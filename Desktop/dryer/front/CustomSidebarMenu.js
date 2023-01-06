@@ -14,8 +14,6 @@ import {
     DrawerItem,
 } from '@react-navigation/drawer';
 
-import Icon from 'react-native-vector-icons/Feather';
-const myIcon = <Icon name="home" size={30} color="#900" />;
 
 const CustomSidebarMenu = (props) => {
     const BASE_PATH ='./assets/image/';
