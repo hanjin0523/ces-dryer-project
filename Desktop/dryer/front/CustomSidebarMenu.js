@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     SafeAreaView,
     View,
     StyleSheet,
     Image,
     Text,
-    Linking,
+    Dimensions
 } from 'react-native';
 
 import {
@@ -14,10 +14,13 @@ import {
     DrawerItem,
 } from '@react-navigation/drawer';
 
+const height = Dimensions.get('window').height;
+const width = Dimensions.get('window').width;
 
 const CustomSidebarMenu = (props) => {
     const BASE_PATH ='./assets/image/';
     const proileImage = 'operationbtn.png';
+    const [dryOnOff, setDryOnOff] = useState(0);
 
     return (
     <SafeAreaView style={{ flex: 1,}}>
@@ -25,64 +28,43 @@ const CustomSidebarMenu = (props) => {
         <View style={styles.sideMenuBox}>
             <Text style={styles.sideMainText}>Crispy<Text style={{fontWeight:"normal", color: "black"}}> recipe</Text></Text>
             <Image
-            source={require(BASE_PATH+'operationbtn.png')}
+            source={dryOnOff ? require(BASE_PATH+'operationbtn.png') : require(BASE_PATH+'waitingbtn.png')}
             style={styles.sideMenuProfileIcon}
             />
         </View>
-        <DrawerContentScrollView {...props} style={{ marginLeft:"12%", width:"70%"}}>
+        <DrawerContentScrollView {...props} style={{ marginLeft:"5%",height:height/20.3720, width:width/6.8651 }}>
         <DrawerItemList {...props}/>
         {/* <Icon */}
-        <View>
-        <DrawerItem
-            label="Visit Us"
-            onPress={() => (console.log('visit'))}
-        />
-        </View>
-        <View style={styles.customItem}>
-            <Text
-            onPress={() => {
-            }}>
-            Rate Us
-            </Text>
-            <Image
-            source={{ uri: BASE_PATH + 'star_filled.png' }}
-            style={styles.iconStyle}
-            />
-        </View>
         </DrawerContentScrollView>
-        <Text style={{ fontSize: 16, textAlign: 'center', color: 'grey', marginBottom: "15%"}}>
-        영농조함페페
+        <View style={{flexDirection:"row", marginBottom:height/20, marginLeft:width/30,alignContent:"center"}}>
+        <Image source={require('./assets/image/Profilebtn.png')}/>
+        <Text style={{ fontSize: 13, textAlign: 'center', color: 'grey', marginTop:height/80}}>
+        영농조합법인페페
         </Text>
+        </View>
     </SafeAreaView>
     );
+
 };
 
 const styles = StyleSheet.create({
     sideMenuBox: {
-        alignItems: "center", 
+        alignItems: "flex-end", 
         flexDirection: "row", 
-        marginLeft: "8.79629%",
-        marginTop: "8.4474%",
-        marginBottom: "3.6529%",
+        marginLeft: width / 77.68421,
+        marginTop: height / 12.0383,
+        marginBottom: height / 60.375,
     },
     sideMainText: {
-        fontSize: 23,
-        marginTop: "15%",
+        fontSize: 21,
         fontWeight: "bold",
         color: "black",
     },
     sideMenuProfileIcon: {
         resizeMode: 'center',
-        width: "19.4444%",
-        height: "30%",
-        marginTop: "17.4474%",
-        marginLeft: "3.7037%",
-        // alignSelf: 'center',
-    },
-    customItem: {
-        padding: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
+        width: width / 33.3333,
+        height: height / 51.5294,
+        marginLeft: width / 175,
     },
 });
 
