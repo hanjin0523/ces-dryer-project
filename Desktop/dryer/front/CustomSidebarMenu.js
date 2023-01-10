@@ -23,8 +23,7 @@ const CustomSidebarMenu = (props) => {
     const [dryOnOff, setDryOnOff] = useState(0);
 
     return (
-    <SafeAreaView style={{ flex: 1,}}>
-      {/*Top Large Image */}
+    <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.sideMenuBox}>
             <Text style={styles.sideMainText}>Crispy<Text style={{fontWeight:"normal", color: "black"}}> recipe</Text></Text>
             <Image
@@ -34,11 +33,10 @@ const CustomSidebarMenu = (props) => {
         </View>
         <DrawerContentScrollView {...props} style={{ marginLeft:"5%",height:height/20.3720, width:width/6.8651 }}>
         <DrawerItemList {...props}/>
-        {/* <Icon */}
         </DrawerContentScrollView>
         <View style={{flexDirection:"row", marginBottom:height/20, marginLeft:width/30,alignContent:"center"}}>
         <Image source={require('./assets/image/Profilebtn.png')}/>
-        <Text style={{ fontSize: 13, textAlign: 'center', color: 'grey', marginTop:height/80}}>
+        <Text style={{ fontSize: 13, textAlign: 'center', color: 'grey', marginTop:height/80, marginLeft:width/140}}>
         영농조합법인페페
         </Text>
         </View>

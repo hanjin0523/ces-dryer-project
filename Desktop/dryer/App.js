@@ -4,7 +4,7 @@ import {
   createDrawerNavigator, 
   DrawerContentScrollView,
   DrawerItemList,
-  DrawerItem, } from '@react-navigation/drawer';
+  DrawerItem,DrawerToggleButton } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import CustomSidebarMenu from './front/CustomSidebarMenu';
 import 'react-native-gesture-handler';
@@ -27,11 +27,12 @@ const Drawer = createDrawerNavigator();
 export default function App() {
 
   return (
-    <NavigationContainer>
+    <NavigationContainer >
       <Drawer.Navigator
         initialRouteName="Home" 
-        drawerContent={( props ) => <CustomSidebarMenu {...props} />} 
+        drawerContent={( props ) => <CustomSidebarMenu {...props}/>} 
         screenOptions={{
+          drawerType:'permanent',
           drawerActiveTintColor: "#763AFF",
           drawerStyle: {
             width: width/6.4814,
@@ -51,7 +52,7 @@ export default function App() {
           drawerLabel: 'Home',
           headerStyle: {
             backgroundColor: '#49319E',
-            height: height / 27.375,        
+            height: height / 27.375, 
           },
           headerTintColor: '#fff',
           headerTitleAlign: 'center',
@@ -70,8 +71,8 @@ export default function App() {
               require('./front/assets/image/homebtn.png') : 
               require('./front/assets/image/puplehome.png')}
             style={{width: width/84.8484, height: height/54.75, marginLeft:"7%", marginBottom:"2%"}}
-            />)
-        }}/>
+            />)}}
+        />
         <Drawer.Screen 
         name="Notifications" 
         component={NotificationsScreen} 
@@ -82,7 +83,7 @@ export default function App() {
           width: width/7.8651,
           height: height/34.3720,
           fontWeight:"bold",
-          marginTop:3
+          marginTop:3,
         },
         drawerIcon: ({focused}) => (
           <Image 
@@ -99,7 +100,7 @@ export default function App() {
         <Drawer.Screen 
         name="Notifications1" 
         component={NotificationsScreen1} 
-        options={{drawerLabel: '프로그램 설정',
+        options={{drawerLabel: '레시피 설정',
         drawerLabelStyle: {
           fontSize: 16,
           marginLeft: -10,
