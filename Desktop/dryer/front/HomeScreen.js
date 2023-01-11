@@ -11,13 +11,29 @@ const DayBtn = () => {
 
     let day = ['일', '월', '화', '수', '목', '금', '토'];
     const today = new Date();
-    const date1 = today.getDate();
-    const date2 = date1 + 1
+    const year = today.getFullYear();
+    const month = (today.getMonth()+1);
+    const date1 = 
+    4;
+    // today.getDate(); 
     const day2 = today.getDay();
+    const date2 = date1 + 1
     const day1 = (day[day2]+"요일");
-
-    
-
+    const lastDay = String(new Date(year, month, 0));
+    const cutLastDay = lastDay.substring(8, 10);
+    let test = new Array();
+    for(var i = 0; i<5; i++){
+        if((cutLastDay>=date1)&&(date1>4)){
+            test.push(date1-i)
+        }else if(date1==4){
+            const lastDay1 = String(new Date(year, month-1, 0));
+            const cutLastDay1 = Number(lastDay1.substring(8, 10));
+            const array = [date1, date1-1, date1-2, date1-3, cutLastDay1]
+            test.push(array[i]);
+        };
+        
+    }
+    console.log(test)
     return(
         <View style={{flexDirection:"row", marginLeft: width/35.4430, alignItems:"center"}}>
             <TouchableOpacity 
@@ -39,6 +55,7 @@ const DayBtn = () => {
                 onPress={()=>setBtnActive(!btnActive)}>
                 <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{day1}</Text>
                 <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{date2}</Text>
+                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{test}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
             style={{marginLeft: width/68.2926}}
