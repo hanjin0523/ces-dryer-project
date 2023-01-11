@@ -46,16 +46,10 @@ export default function App() {
           }
         }}>
         <Drawer.Screen
-        name="Home" 
+        name="Home"
         component={HomeScreen}
         options={{ 
           drawerLabel: 'Home',
-          headerStyle: {
-            backgroundColor: '#49319E',
-            height: height / 27.375, 
-          },
-          headerTintColor: '#fff',
-          headerTitleAlign: 'center',
           drawerLabelStyle: {
             fontSize: 16,
             marginLeft: -10,
@@ -64,6 +58,17 @@ export default function App() {
             fontWeight:"bold",
             marginTop:3
           },
+          headerTitle:"crispy recipe",
+          headerStyle: {
+            backgroundColor: '#49319E',
+            height: height / 22.1772, 
+          },
+          headerTitleStyle: {
+            fontSize: 23,
+            lineHeight: 28,
+          },
+          headerTintColor: '#fff',
+          headerTitleAlign: 'center',
           drawerIcon: ({focused}) => (
             <Image 
             source={
@@ -85,6 +90,17 @@ export default function App() {
           fontWeight:"bold",
           marginTop:3,
         },
+        headerTitle:"crispy recipe",
+          headerStyle: {
+            backgroundColor: '#49319E',
+            height: height / 22.1772, 
+          },
+          headerTitleStyle: {
+            fontSize: 23,
+            lineHeight: 28,
+          },
+          headerTintColor: '#fff',
+          headerTitleAlign: 'center',
         drawerIcon: ({focused}) => (
           <Image 
           source={ 
@@ -109,6 +125,17 @@ export default function App() {
           fontWeight:"bold",
           marginTop:3
         },
+        headerTitle:"crispy recipe",
+          headerStyle: {
+            backgroundColor: '#49319E',
+            height: height / 22.1772, 
+          },
+          headerTitleStyle: {
+            fontSize: 23,
+            lineHeight: 28,
+          },
+          headerTintColor: '#fff',
+          headerTitleAlign: 'center',
         drawerIcon: ({focused}) => (
           <Image 
           source={
@@ -137,6 +164,17 @@ export default function App() {
           fontWeight:"bold",
           marginTop:3
         },
+        headerTitle:"crispy recipe",
+          headerStyle: {
+            backgroundColor: '#49319E',
+            height: height / 22.1772, 
+          },
+          headerTitleStyle: {
+            fontSize: 23,
+            lineHeight: 28,
+          },
+          headerTintColor: '#fff',
+          headerTitleAlign: 'center',
         drawerIcon: ({focused}) => (
           <Image 
           source={
