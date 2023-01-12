@@ -1,6 +1,8 @@
-import  React, { useEffect, useState } from 'react';
+import  React, { useCallback, useEffect, useState } from 'react';
 import { Button, Dimensions, View, Image, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 import 'react-native-gesture-handler';
+import { TextInput } from 'react-native-gesture-handler';
+import { event } from 'react-native-reanimated';
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
@@ -8,61 +10,71 @@ const width = Dimensions.get('window').width;
 const DayBtn = () => {
     
     const [btnActive, setBtnActive] = useState(0);
+    const [date, setDate] = useState(0);
+    const [num, setNum] = useState(0);
 
+    console.log(num)
+    console.log(btnActive)
+    
     let day = ['일', '월', '화', '수', '목', '금', '토'];
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth()+1);
-    const date1 = 
-    4;
-    // today.getDate(); 
-    const day2 = today.getDay();
-    const date2 = date1 + 1
-    const day1 = (day[day2]+"요일");
-    const lastDay = String(new Date(year, month, 0));
-    const cutLastDay = lastDay.substring(8, 10);
-    let test = new Array();
-    for(var i = 0; i<5; i++){
-        if((cutLastDay>=date1)&&(date1>4)){
-            test.push(date1-i)
-        }else if(date1==4){
-            const lastDay1 = String(new Date(year, month-1, 0));
-            const cutLastDay1 = Number(lastDay1.substring(8, 10));
-            const array = [date1, date1-1, date1-2, date1-3, cutLastDay1]
-            test.push(array[i]);
-        };
-        
+    const date1 = (today.getDate()-date);
+
+    const NumBox = (props) => {
+        let test = new Array();
+        let test1 = new Array();
+        const dayNumber = new Date(year, month-1,(date1-props.num))
+        const number5 = String(dayNumber)
+        const intNumber = number5.substring(8, 10)
+        const daylist = (day[dayNumber.getDay()]+"요일")
+        return(
+            <TouchableOpacity key={4}
+                style={btnActive ? style.dayBtn : style.dayBtnAct}
+                onPress={(props) => setBtnActive(!btnActive)}>
+                <View></View>
+                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
+                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
+            </TouchableOpacity>
+        )
     }
-    console.log(test)
+
+    // for(var i = 4; i>=0; i--){
+    //     const dayNumber = new Date(year, month-1,(date1-i))
+    //     const number5 = String(dayNumber)
+    //     const intNumber = number5.substring(8, 10)
+    //     const daylist = (day[dayNumber.getDay()]+"요일")
+    //     test.push(
+    //         <TouchableOpacity key={i}
+    //             style={btnActive ? style.dayBtn : style.dayBtnAct}
+    //             onPress={(event) => setBtnActive(!btnActive)}>
+    //             <View></View>
+    //             <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
+    //             <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
+    //         </TouchableOpacity>
+    //     )
+    // }
     return(
-        <View style={{flexDirection:"row", marginLeft: width/35.4430, alignItems:"center"}}>
+        <View style={{flexDirection:"row", marginLeft: width/35.4430,alignItems:"center"}}>
             <TouchableOpacity 
-            style={{marginRight: width/68.2926}}
-            onPress={()=>console.log("hi")}>
+                style={{marginRight: width/68.2926}}
+                onPress={()=>setDate(date+1)}>
                 <Image 
                     source={require('./assets/image/listbtn.png')} 
                     style={style.listbtn}
                     resizeMode="contain"/>
             </TouchableOpacity>
+                <NumBox num={4}/>
+                <NumBox num={3}/>
+                <NumBox num={2}/>
+                <NumBox num={1}/>
+                <NumBox num={0}/>
             <TouchableOpacity 
-                style={btnActive ? style.dayBtn : style.dayBtnAct}
-                onPress={()=>setBtnActive(!btnActive)}>
-                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{day1}</Text>
-                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{date1}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-                style={btnActive ? style.dayBtn : style.dayBtnAct}
-                onPress={()=>setBtnActive(!btnActive)}>
-                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{day1}</Text>
-                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{date2}</Text>
-                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{test}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-            style={{marginLeft: width/68.2926}}
-            onPress={()=>console.log("hi")}>
+                onPress={()=>setDate(date-1)}>
                 <Image 
                     source={require('./assets/image/listbtnR.png')} 
-                    style={style.listbtn}
+                    style={style.listbtn1}
                     resizeMode="contain"/>
             </TouchableOpacity>
         </View>
@@ -196,6 +208,10 @@ export default function HomeScreen({ navigation }) {
     );
 }
 const style = StyleSheet.create({
+    listbtn1: {
+        height:height/40.8,
+        width: width/70,
+    },
     listbtn: {
         height:height/40.8,
         width: width/70,
@@ -218,6 +234,7 @@ const style = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 10,
+        marginRight: width/52.8301
     },
     BoxText : {
         fontSize: 22,
@@ -247,6 +264,7 @@ const style = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 10,
+        marginRight: width/52.8301
     },
     timeText: {
         fontSize: height/55,
