@@ -2,10 +2,55 @@ import  React, { useCallback, useEffect, useState } from 'react';
 import { Button, Dimensions, View, Image, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 import 'react-native-gesture-handler';
 import { TextInput } from 'react-native-gesture-handler';
-import { event } from 'react-native-reanimated';
+import { combineTransition, event } from 'react-native-reanimated';
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
+
+const RecipeList = () => {
+    
+    const RecipeStage = (props) => {
+
+
+
+        return(
+            <View style={style.recipeBack1}>
+                <BouncyCheckbox 
+                    size={22}
+                    fillColor="#763AFF"
+                    unfillColor="#E1E3E6"
+                    iconStyle={{borderRadius:5, borderWidth:0}}
+                    innerIconStyle={{borderWidth:0}}
+                    style={style.checkBox}
+                />
+                <Text>{props.name}</Text>
+                <Text>{props.time}</Text>
+                <Text>{props.stage}</Text>
+            </View>
+        );
+    };
+
+    return(
+        <>
+        <View style={style.recipeBack}>
+            <BouncyCheckbox 
+                size={22}
+                fillColor="#763AFF"
+                unfillColor="#E1E3E6"
+                iconStyle={{borderRadius:5, borderWidth:0}}
+                innerIconStyle={{borderWidth:0}}
+                style={style.checkBox}
+            />
+            <Text style={style.select}>레시피 이름</Text>
+            <Text style={style.select}>총 건조시간</Text>
+            <Text style={style.select1}>스테이지</Text>
+        </View>    
+        <RecipeStage name="청양고추건조" time="13시간 21분 16초" stage="4"/>
+        </>
+    );
+};
 
 const DayBtn = () => {
     
@@ -30,10 +75,9 @@ const DayBtn = () => {
         const intNumber = number5.substring(8, 10)
         const daylist = (day[dayNumber.getDay()]+"요일")
         return(
-            <TouchableOpacity key={4}
+            <TouchableOpacity
                 style={btnActive ? style.dayBtn : style.dayBtnAct}
                 onPress={(props) => setBtnActive(!btnActive)}>
-                <View></View>
                 <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
                 <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
             </TouchableOpacity>
@@ -70,7 +114,7 @@ const DayBtn = () => {
                 <NumBox num={2}/>
                 <NumBox num={1}/>
                 <NumBox num={0}/>
-            <TouchableOpacity 
+            <TouchableOpacity style={{marginLeft: -width/300}}
                 onPress={()=>setDate(date-1)}>
                 <Image 
                     source={require('./assets/image/listbtnR.png')} 
@@ -198,6 +242,7 @@ export default function HomeScreen({ navigation }) {
             <View style={style.homeSecondBox}>
                 <Time />
                 <DayBtn />
+                <RecipeList />
             </View>
         </View>
         {/* <Button
@@ -208,6 +253,42 @@ export default function HomeScreen({ navigation }) {
     );
 }
 const style = StyleSheet.create({
+    recipeBack1: {
+        width: width/2.43,
+        height: height/18.6382,
+        marginLeft: width/35.4430,
+        borderRadius: 10,
+        justifyContent: "center",
+        flexDirection: "row",
+        borderBottomColor: "#A3A2A8",
+        borderBottomWidth: 1,
+    },
+    select1:{
+        fontSize: 20, 
+        color: "black",
+        lineHeight: 55,
+        marginRight: width/34.5679
+    },
+    select:{
+        fontSize: 20, 
+        color: "black",
+        lineHeight: 55,
+        marginRight: width/10.9527
+    },
+    checkBox: {
+        marginLeft: width/37.5679,
+        marginRight: width/140.3333
+        },
+    recipeBack: {
+        width: width/2.43,
+        height: height/18.6382,
+        marginLeft: width/35.4430,
+        marginTop: height/17.52,
+        backgroundColor: "#F5F6FA",
+        borderRadius: 10,
+        justifyContent: "center",
+        flexDirection: "row",
+    },
     listbtn1: {
         height:height/40.8,
         width: width/70,
