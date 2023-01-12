@@ -23,11 +23,27 @@ const RecipeList = () => {
                     unfillColor="#E1E3E6"
                     iconStyle={{borderRadius:5, borderWidth:0}}
                     innerIconStyle={{borderWidth:0}}
-                    style={style.checkBox}
+                    style={style.checkBox1}
                 />
-                <Text>{props.name}</Text>
-                <Text>{props.time}</Text>
-                <Text>{props.stage}</Text>
+                <View style={{marginRight: width/23,width:width/11}}>
+                    <Text style={style.recipeText}>{props.name}</Text>
+                </View>
+                <View style={{marginRight: width/16, width:width/10.9}}>
+                    <Text style={style.recipeText}>{props.time}</Text>
+                </View>
+                <View style={{marginRight: width/20 ,flexDirection:"row"}}>
+                    <Text style={style.recipeText}>{props.stage}</Text>
+                    <TouchableOpacity>
+                        <Image 
+                        style={style.stageBtn}
+                        source={require("./assets/image/stagecontrolbtnOn.png")}/>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                        <Image 
+                        style={style.stageBtn}
+                        source={require("./assets/image/stagecontrolbtnOff.png")}/>
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     };
@@ -47,7 +63,7 @@ const RecipeList = () => {
             <Text style={style.select}>총 건조시간</Text>
             <Text style={style.select1}>스테이지</Text>
         </View>    
-        <RecipeStage name="청양고추건조" time="13시간 21분 16초" stage="4"/>
+        <RecipeStage name="청양고추건조" time="13시 21분 16초" stage="4"/>
         </>
     );
 };
@@ -253,12 +269,22 @@ export default function HomeScreen({ navigation }) {
     );
 }
 const style = StyleSheet.create({
+    stageBtn: {
+        marginRight: width/160,
+        marginTop: height/70
+    },
+    recipeText: {
+        fontSize: 20, 
+        color: "#A3A2A8",
+        lineHeight: 55,
+        marginRight: width/200,
+    },
     recipeBack1: {
         width: width/2.43,
         height: height/18.6382,
         marginLeft: width/35.4430,
         borderRadius: 10,
-        justifyContent: "center",
+        // justifyContent: "center",
         flexDirection: "row",
         borderBottomColor: "#A3A2A8",
         borderBottomWidth: 1,
@@ -275,6 +301,10 @@ const style = StyleSheet.create({
         lineHeight: 55,
         marginRight: width/10.9527
     },
+    checkBox1: {
+        marginLeft: width/37.0679,
+        marginRight: width/144.3333
+        },
     checkBox: {
         marginLeft: width/37.5679,
         marginRight: width/140.3333
