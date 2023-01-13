@@ -1,9 +1,15 @@
 import  React, { useCallback, useEffect, useState } from 'react';
-import { Button, Dimensions, View, Image, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
+import { Button, Dimensions, View, Image, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import 'react-native-gesture-handler';
 import { TextInput } from 'react-native-gesture-handler';
 import { combineTransition, event } from 'react-native-reanimated';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import ScrollViewIndicator from 'react-native-scroll-indicator';
+import { template } from '@babel/core';
+
+import TempImg from './TempImg';
+import HumImg from './HumImg';
+import Operation from './Operation'
 
 
 const height = Dimensions.get('window').height;
@@ -12,6 +18,8 @@ const width = Dimensions.get('window').width;
 const RecipeList = () => {
     
     const RecipeStage = (props) => {
+
+        const [stage, setStage] = useState();
 
 
 
@@ -25,10 +33,10 @@ const RecipeList = () => {
                     innerIconStyle={{borderWidth:0}}
                     style={style.checkBox1}
                 />
-                <View style={{marginRight: width/23,width:width/11}}>
+                <View style={{marginRight: width/25.1,width:width/11}}>
                     <Text style={style.recipeText}>{props.name}</Text>
                 </View>
-                <View style={{marginRight: width/16, width:width/10.9}}>
+                <View style={{marginRight: width/13.7, width:width/10.5}}>
                     <Text style={style.recipeText}>{props.time}</Text>
                 </View>
                 <View style={{marginRight: width/20 ,flexDirection:"row"}}>
@@ -36,14 +44,16 @@ const RecipeList = () => {
                     <TouchableOpacity>
                         <Image 
                         style={style.stageBtn}
-                        source={require("./assets/image/stagecontrolbtnOn.png")}/>
+                        source={require("./assets/image/stagecontrolbtnOn.png")}
+                        resizeMode="contain"/>
                     </TouchableOpacity>
                     <TouchableOpacity>
                         <Image 
                         style={style.stageBtn}
-                        source={require("./assets/image/stagecontrolbtnOff.png")}/>
+                        source={require("./assets/image/stagecontrolbtnOff.png")}
+                        resizeMode="contain"/>
                     </TouchableOpacity>
-                </View>
+                </View>     
             </View>
         );
     };
@@ -51,19 +61,40 @@ const RecipeList = () => {
     return(
         <>
         <View style={style.recipeBack}>
-            <BouncyCheckbox 
-                size={22}
-                fillColor="#763AFF"
-                unfillColor="#E1E3E6"
-                iconStyle={{borderRadius:5, borderWidth:0}}
-                innerIconStyle={{borderWidth:0}}
-                style={style.checkBox}
-            />
             <Text style={style.select}>레시피 이름</Text>
             <Text style={style.select}>총 건조시간</Text>
             <Text style={style.select1}>스테이지</Text>
-        </View>    
-        <RecipeStage name="청양고추건조" time="13시 21분 16초" stage="4"/>
+        </View>
+        <View style={{height: height/4.4, width:width/2.265}}>
+            <ScrollViewIndicator
+                persistentScrollbar={true}
+                shouldIndicatorHide={false}
+                scrollIndicatorStyle={{ backgroundColor: "#753CEF", height:height/9}}
+                scrollIndicatorContainerStyle={{ backgroundColor: "#EFEDF1"}}
+                >    
+                <RecipeStage name="청양고추건조" time="14시 21분 16초" stage="4"/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+                <RecipeStage name="마늘건조" time="14시 21분 16초" stage="6"/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+            </ScrollViewIndicator>
+        </View>
+        <View style={style.comBtnBox}>
+            <TouchableOpacity>
+                <View style={style.comBtn}>
+                    <Text style={style.comBtnText}>레시피설정</Text>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity>
+                <View style={style.comBtn1}>
+                    <Text style={style.comBtnText1}>송풍(탈취)가동</Text>
+                </View>
+            </TouchableOpacity>
+        </View>
         </>
     );
 };
@@ -100,21 +131,6 @@ const DayBtn = () => {
         )
     }
 
-    // for(var i = 4; i>=0; i--){
-    //     const dayNumber = new Date(year, month-1,(date1-i))
-    //     const number5 = String(dayNumber)
-    //     const intNumber = number5.substring(8, 10)
-    //     const daylist = (day[dayNumber.getDay()]+"요일")
-    //     test.push(
-    //         <TouchableOpacity key={i}
-    //             style={btnActive ? style.dayBtn : style.dayBtnAct}
-    //             onPress={(event) => setBtnActive(!btnActive)}>
-    //             <View></View>
-    //             <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
-    //             <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
-    //         </TouchableOpacity>
-    //     )
-    // }
     return(
         <View style={{flexDirection:"row", marginLeft: width/35.4430,alignItems:"center"}}>
             <TouchableOpacity 
@@ -201,33 +217,18 @@ const SubText = props => {
     );
 };
 
-const TemHumImg = props => {
-    return(
-        <ImageBackground source={
-            props.imgName === "temperature1" ?
-            require("./assets/image/temperature1.png") :
-            require("./assets/image/humidity1.png")} 
-            style={style.temHumImg}
-            resizeMode="contain">
-            <Text style={style.imgInnerText}>{props.TemNumber}
-                <Text style={{fontSize:20,}}>{props.unit}</Text>
-            </Text>    
-            </ImageBackground>
-    );
-};
-
 export default function HomeScreen({ navigation }) {
 
     const [thermicRays, setThermicRays] = useState(0);
     const [blowing, setBlowing] = useState(1);
     const [learning, setLearning] = useState(0);
-
+    
 
     return (
     <View style={style.homeMainBox}>
         <View style={style.homeInnerBox}>
             <View style={style.homeFirstBox}>
-                <View style={{flexDirection:"row",marginTop: height/12.6811,marginBottom: height/30.7368}}>
+                <View style={{flexDirection:"row",marginTop: height/15.6811,marginBottom: height/30.7368}}>
                     <Text style={style.BoxTitle}>
                         Recipe Progress
                     </Text>
@@ -240,19 +241,14 @@ export default function HomeScreen({ navigation }) {
                     <ImageAll text="송풍" control={blowing}/>
                     <ImageAll text="배습" control={learning}/>
                 </View>
-                <View style={{}}>
-                    <Image source={
-                        require('./assets/image/wait.png')} 
-                        resizeMode="contain"
-                        style={style.waitImg}/>
-                </View>
+                <Operation />
                 <View style={{flexDirection:"row", alignItems:"center", width:width/4.7, marginTop: height/21.3380}}>
                     <SubText main="Temperature" sub="온도"/>
                     <SubText main="Humidity" sub="습도"/>
                 </View>
                 <View style={{flexDirection:"row", width: width/4.7}}>
-                    <TemHumImg TemNumber="18" imgName="temperature1" unit="°C"/>
-                    <TemHumImg TemNumber="42" imgName="humidity1" unit="%"/>
+                    <TempImg />
+                    <HumImg />
                 </View>
             </View>
             <View style={style.homeSecondBox}>
@@ -269,54 +265,86 @@ export default function HomeScreen({ navigation }) {
     );
 }
 const style = StyleSheet.create({
+    comBtnText1: {
+        color: "#B5B3B9",
+        fontSize: 22.9   
+    },
+    comBtnText: {
+        color: "#FFDB5E",
+        fontSize: 22.9   
+    },
+    comBtn1: {
+        backgroundColor:"#FFFFFF",
+        width: width/3.5343,
+        height: height/16.5,
+        borderRadius: 7,
+        borderColor:"#B5B3B9",
+        borderWidth: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: height/67.3846
+    },
+    comBtnBox: {
+        flexDirection:"column",
+        alignItems: "center",
+    },
+    comBtn: {
+        backgroundColor:"#753CEF",
+        width: width/3.5343,
+        height: height/15.5,
+        borderRadius: 7,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: height/22.4358,
+    },
     stageBtn: {
-        marginRight: width/160,
-        marginTop: height/70
+        marginRight: width/130,
+        marginTop: height/51.0571,
+        width: width/100,
+        height: height/70,
     },
     recipeText: {
         fontSize: 20, 
         color: "#A3A2A8",
-        lineHeight: 55,
-        marginRight: width/200,
+        lineHeight: 60,
+        marginRight: width/250,
+        marginLeft: -width/200
     },
     recipeBack1: {
-        width: width/2.43,
-        height: height/18.6382,
-        marginLeft: width/35.4430,
+        width: width/2.49,
+        height: height/17.6382,
+        marginLeft: width/33.4430,
         borderRadius: 10,
         // justifyContent: "center",
         flexDirection: "row",
-        borderBottomColor: "#A3A2A8",
+        borderBottomColor: "#E6E6E9",
         borderBottomWidth: 1,
     },
     select1:{
         fontSize: 20, 
         color: "black",
         lineHeight: 55,
-        marginRight: width/34.5679
+        marginRight: width/44.5679,
+        marginLeft: width/36,
     },
     select:{
+        marginLeft: width/36,
         fontSize: 20, 
         color: "black",
         lineHeight: 55,
-        marginRight: width/10.9527
+        marginRight: width/12.8927
     },
     checkBox1: {
-        marginLeft: width/37.0679,
-        marginRight: width/144.3333
-        },
-    checkBox: {
-        marginLeft: width/37.5679,
-        marginRight: width/140.3333
+        marginLeft: width/36.0679,
+        marginRight: width/400.3333
         },
     recipeBack: {
         width: width/2.43,
         height: height/18.6382,
-        marginLeft: width/35.4430,
-        marginTop: height/17.52,
+        marginLeft: width/33.4430,
+        marginTop: height/15.52,
         backgroundColor: "#F5F6FA",
         borderRadius: 10,
-        justifyContent: "center",
         flexDirection: "row",
     },
     listbtn1: {
@@ -332,8 +360,8 @@ const style = StyleSheet.create({
         alignItems: "center",
         justifyContent:"center",
         padding : 10,
-        height: height/9.3191,
-        width: width/18.0645,
+        height: height/8.7191,
+        width: width/17.9645,
         borderWidth: 1,
         borderColor: "#E5E5E5",
         borderRadius: 10,
@@ -362,7 +390,7 @@ const style = StyleSheet.create({
         alignItems: "center",
         justifyContent:"center",
         padding : 10,
-        height: height/9.3191,
+        height: height/8.7191,
         width: width/18.0645,
         borderWidth: 1,
         borderColor: "#E5E5E5",
@@ -393,7 +421,7 @@ const style = StyleSheet.create({
         height: height/14,
         width: width/2.43,
         marginLeft: width/35.4430,
-        marginTop: height/12.6956,
+        marginTop: height/15.6811,
         flexDirection: "row",
         borderBottomColor: "#D0D0D4",
         borderBottomWidth: 1,
@@ -456,11 +484,6 @@ const style = StyleSheet.create({
         fontSize: 16,
         color: "black",
     },
-    waitImg: {
-        width: width/5.7851,
-        marginTop: height/38.9777,
-        height: height/2.9107,
-    },
     subText: {
         flexDirection: "row"
     },
@@ -476,17 +499,5 @@ const style = StyleSheet.create({
         marginRight: width/38,
         color: "black"
     },
-    temHumImg: {
-        width: width/10.7,
-        height: height/5,
-        marginLeft: width/300,
-        marginRight: width/55.6666,
-    },
-    imgInnerText: {
-        fontSize: 40,
-        fontWeight: "bold",
-        marginTop: height/14,
-        marginLeft: width/33,
-        color: "black"
-    }
+    
   })
