@@ -1,5 +1,15 @@
-import  React, { useCallback, useEffect, useState } from 'react';
-import { Button, Dimensions, View, Image, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import  React, { useCallback, useEffect, useState, } from 'react';
+import { Button, 
+        Dimensions, 
+        View, 
+        Image, 
+        Text, 
+        StyleSheet, 
+        ImageBackground, 
+        TouchableOpacity, 
+        ScrollView, 
+        FlatList,
+        Alert } from 'react-native';
 import 'react-native-gesture-handler';
 import { TextInput } from 'react-native-gesture-handler';
 import { combineTransition, event } from 'react-native-reanimated';
@@ -10,6 +20,7 @@ import { template } from '@babel/core';
 import TempImg from './TempImg';
 import HumImg from './HumImg';
 import Operation from './Operation'
+import Time from './Time';
 
 
 const height = Dimensions.get('window').height;
@@ -17,21 +28,41 @@ const width = Dimensions.get('window').width;
 
 const RecipeList = () => {
     
+    const [checked1, setChecked1] = useState(0);
+    const [stage, setStage] = useState(0);
+
+console.log(stage)
+
     const RecipeStage = (props) => {
+    const stageNumBase = props.stage
 
-        const [stage, setStage] = useState();
-
+    const [stageNum, setStageNum] = useState(stageNumBase);
+    const [button, setButton] = useState(true);
+    const [button1, setButton1] = useState(true);
+    
+    const maxStage = (stageNum) => {
+        if(stageNum < stageNumBase){
+            setStageNum(stageNum+1)
+        }
+    }
+    const minStage = (stageNum) => {
+        if(stageNum > 1){
+            setStageNum(stageNum-1)
+        }
+    }
 
 
         return(
             <View style={style.recipeBack1}>
-                <BouncyCheckbox 
+                <BouncyCheckbox
+                    isChecked={checked1 === props.num}
                     size={22}
                     fillColor="#763AFF"
                     unfillColor="#E1E3E6"
                     iconStyle={{borderRadius:5, borderWidth:0}}
                     innerIconStyle={{borderWidth:0}}
                     style={style.checkBox1}
+                    onPress={() => {setChecked1(props.num); setStage(stageNum)}}
                 />
                 <View style={{marginRight: width/25.1,width:width/11}}>
                     <Text style={style.recipeText}>{props.name}</Text>
@@ -40,17 +71,29 @@ const RecipeList = () => {
                     <Text style={style.recipeText}>{props.time}</Text>
                 </View>
                 <View style={{marginRight: width/20 ,flexDirection:"row"}}>
-                    <Text style={style.recipeText}>{props.stage}</Text>
-                    <TouchableOpacity>
+                    <Text style={style.recipeText}>{stageNum}</Text>
+                    <TouchableOpacity activeOpacity={1}
+                        onPressIn={() => setButton1(false)}
+                        onPressOut={() => setButton1(true)} 
+                        onPress={() => maxStage(stageNum)}>
                         <Image 
                         style={style.stageBtn}
-                        source={require("./assets/image/stagecontrolbtnOn.png")}
+                        source={
+                            button1 ?
+                            require("./assets/image/stagecontrolbtnOn.png"):
+                            require("./assets/image/stagecontrolbtnOffdown.png")}
                         resizeMode="contain"/>
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity activeOpacity={1}
+                        onPressIn={() => setButton(false)}
+                        onPressOut={() => setButton(true)} 
+                        onPress={() => minStage(stageNum)}>
                         <Image 
                         style={style.stageBtn}
-                        source={require("./assets/image/stagecontrolbtnOff.png")}
+                        source={
+                            !button ?
+                            require("./assets/image/stagecontrolbtnOff.png"):
+                            require("./assets/image/stagecontrolOndown.png")}
                         resizeMode="contain"/>
                     </TouchableOpacity>
                 </View>     
@@ -72,15 +115,15 @@ const RecipeList = () => {
                 scrollIndicatorStyle={{ backgroundColor: "#753CEF", height:height/9}}
                 scrollIndicatorContainerStyle={{ backgroundColor: "#EFEDF1"}}
                 >    
-                <RecipeStage name="청양고추건조" time="14시 21분 16초" stage="4"/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
-                <RecipeStage name="마늘건조" time="14시 21분 16초" stage="6"/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage="5"/>
+                <RecipeStage name="청양고추건조" time="14시 21분 16초" stage={4} num={1}/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={2}/>
+                <RecipeStage name="마늘건조" time="14시 21분 16초" stage={6} num={3}/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={4}/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={5}/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={6}/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={7}/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={8}/>
+                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={9}/>
             </ScrollViewIndicator>
         </View>
         <View style={style.comBtnBox}>
@@ -104,9 +147,6 @@ const DayBtn = () => {
     const [btnActive, setBtnActive] = useState(0);
     const [date, setDate] = useState(0);
     const [num, setNum] = useState(0);
-
-    console.log(num)
-    console.log(btnActive)
     
     let day = ['일', '월', '화', '수', '목', '금', '토'];
     const today = new Date();
@@ -123,10 +163,10 @@ const DayBtn = () => {
         const daylist = (day[dayNumber.getDay()]+"요일")
         return(
             <TouchableOpacity
-                style={btnActive ? style.dayBtn : style.dayBtnAct}
-                onPress={(props) => setBtnActive(!btnActive)}>
-                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
-                <Text style={!btnActive ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
+                style={btnActive === intNumber ? style.dayBtn : style.dayBtnAct}
+                onPress={(props) => setBtnActive(intNumber)} >
+                <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
+                <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
             </TouchableOpacity>
         )
     }
@@ -154,43 +194,6 @@ const DayBtn = () => {
                     resizeMode="contain"/>
             </TouchableOpacity>
         </View>
-    );
-};
-
-const Time = () => {
-    
-    const [setTime, setSetTime] = useState("00:00:00");
-    const [setDay, setSetDay] = useState("00월00일0요일");
-
-    const currentTime = () => {
-    let day = ['일', '월', '화', '수', '목', '금', '토'];
-    var today = new Date();
-
-    const month1 = (today.getMonth()+1)
-    const date1 = today.getDate()  
-    const day1 = day[today.getDay()]
-    const hour = String(today.getHours()).padStart(2,"0")
-    const minute = String(today.getMinutes()).padStart(2,"0")
-    const second = String(today.getSeconds()).padStart(2,"0") 
-    
-    setSetTime(`${hour}:${minute}:${second}`)
-    setSetDay(`${month1}월 ${date1}일 ${day1}요일`)
-    }
-    const startTime = () => {
-        setInterval(currentTime, 1000)
-    }
-    startTime();
-
-    return(
-        <>
-        <View style={style.secondBoxTitle}>
-            <Text style={style.dayText}>{setDay}</Text>
-            <Text style={style.timeText}>{setTime}</Text>
-        </View>
-        <View>
-            <View></View>
-        </View>
-        </>
     );
 };
 
@@ -404,29 +407,6 @@ const style = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 10,
         marginRight: width/52.8301
-    },
-    timeText: {
-        fontSize: height/55,
-        fontWeight: "bold",
-        color: "black",
-        lineHeight: 65,
-        marginLeft: width/84.8484,
-    },
-    dayText: {
-        fontSize: height/29.7317,
-        fontWeight: "bold",
-        color: "black"
-    },
-    secondBoxTitle: {
-        height: height/14,
-        width: width/2.43,
-        marginLeft: width/35.4430,
-        marginTop: height/15.6811,
-        flexDirection: "row",
-        borderBottomColor: "#D0D0D4",
-        borderBottomWidth: 1,
-        paddingBottom: height/32.4444,
-        marginBottom: height/29.2,
     },
     homeMainBox: {
         flex: 1, 
