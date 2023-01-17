@@ -14,6 +14,8 @@
     "@react-navigation/drawer": "6.5.6",
     "@react-navigation/native": "6.1.1",
     "android": "0.0.8",
+    "axios": "1.2.2",
+    "date-fns": "2.29.3",
     "react": "17.0.2",
     "react-native": "0.68.2",
     "react-native-bouncy-checkbox": "3.0.6",
