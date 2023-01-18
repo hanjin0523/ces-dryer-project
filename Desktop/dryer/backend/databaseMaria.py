@@ -58,9 +58,10 @@ def jsonTest(date) :
     cur = conn.cursor()
     sql = "SELECT dr.recipeName, rl.recipeListNum, rl.recipeNum, rl.actionTime,	rl.recipeListJoin FROM recipeList rl join dryRecipe dr on rl.recipeNum = dr.recipeNum WHERE recipeListJoin = %s" 
     cur.execute(sql, date)
-    row = cur.fetchone()
+    row = cur.fetchall()
+    
+    typeArr = ["%d","%d","%d","%s","%s"]
     json = []
     for i in row:
-        print(row)
         json.append(row)
     return json

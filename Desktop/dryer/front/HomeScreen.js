@@ -19,6 +19,7 @@ import { template } from '@babel/core';
 import 'react-native-gesture-handler';
 import axios from "axios"
 import { format } from 'date-fns';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import TempImg from './TempImg';
 import HumImg from './HumImg';
@@ -29,14 +30,24 @@ import Time from './Time';
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const RecipeList = ({navigation}) => {
+const RecipeList = (props) => {
     
     const [checked1, setChecked1] = useState(0);
     const [stage, setStage] = useState(0);
     const [talk, setTalk] = useState(0);
     const [sendRecipe, setSendRecipe] = useState([]);
+    const [aa1, setAa1] = useState(0);
 
-    // console.log(sendRecipe)
+    console.log(aa1)
+    const numTest = async () => {
+        const test = await axios
+            .get("http://10.0.2.2:8000/items/"+props.day)
+            .then((res) => setAa1(res.data))
+            .catch(error => console.log(error));
+    }
+    useEffect(()=>{
+        numTest()
+    },[props.day])
 
     const RecipeStage = (props) => {
         
@@ -46,7 +57,14 @@ const RecipeList = ({navigation}) => {
         const [button, setButton] = useState(true);
         const [button1, setButton1] = useState(true);
         
-        
+        const time =(seconds) => {
+
+            var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
+            var min = parseInt((seconds%3600)/60) < 10 ? '0'+ parseInt((seconds%3600)/60) : parseInt((seconds%3600)/60);
+            var sec = seconds % 60 < 10 ? '0'+seconds % 60 : seconds % 60;
+
+            return hour+":"+min+":"+sec;
+        }
         const maxStage = (stageNum) => {
             if(stageNum < stageNumBase){
                 setStageNum(stageNum+1)
@@ -57,7 +75,7 @@ const RecipeList = ({navigation}) => {
                 setStageNum(stageNum-1)
             }
         }
-        // const ip = window.location.host;
+        
         
         return(
             <View style={style.recipeBack1}>
@@ -69,7 +87,7 @@ const RecipeList = ({navigation}) => {
                     iconStyle={{borderRadius:5, borderWidth:0}}
                     innerIconStyle={{borderWidth:0}}
                     style={style.checkBox1}
-                    onPress={() => {setChecked1(props.num); setStage(stageNum);}}
+                    onPress={() => {setChecked1(props.num); setStage(stageNum); setTalk(!talk)}}
                 />
                 <View style={{marginRight: width/25.1,width:width/11}}>
                     <Text style={style.recipeText}>{props.name}</Text>
@@ -107,6 +125,7 @@ const RecipeList = ({navigation}) => {
             </View>
         );
     };
+    
 
     return(
         <>
@@ -122,7 +141,7 @@ const RecipeList = ({navigation}) => {
                 scrollIndicatorStyle={{ backgroundColor: "#753CEF", height:height/9}}
                 scrollIndicatorContainerStyle={{ backgroundColor: "#EFEDF1"}}
                 >    
-                <RecipeStage name="청양고추건조" time="14시 21분 16초" stage={4} num={1}/>
+                <RecipeStage name={aa1} time="14시 21분 16초" stage={4} num={1}/>
                 <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={2}/>
                 <RecipeStage name="마늘건조" time="14시 21분 16초" stage={6} num={3}/>
                 <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={4}/>
@@ -158,33 +177,27 @@ const RecipeList = ({navigation}) => {
     );
 };
 
-const DayBtn = () => {
-    
+const DayBtn = (props, navigation) => {
+
     const [btnActive, setBtnActive] = useState(0);
     const [date, setDate] = useState(0);
     const [num, setNum] = useState(0);
-    const [sendDate, setSendDate] = useState(0);
-    
-    let day = ['일', '월', '화', '수', '목', '금', '토'];
+    const [sendDate, setSendDate] = useState(today);
+    const [select, setSelect] = useState(0);
 
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth()+1);
     const date1 = (today.getDate()-date);
+    let day = ['일', '월', '화', '수', '목', '금', '토'];
 
-    const [select, setSelect] = useState(0);
 
-    console.log(select);
-
-    const numTest = async () => {
-        const test = await axios
-            .get("http://10.0.2.2:8000/items/"+sendDate)
-            .then((res) => setSelect(res.data))
-            .catch(error => console.log(error));
-    }
-    useEffect(() => {
-        numTest()
-    },[sendDate])
+    // const numTest = async () => {
+    //     const test = await axios
+    //         .get("http://10.0.2.2:8000/items/"+sendDate)
+    //         .then((res) => setSelect(res.data))
+    //         .catch(error => console.log(error));
+    // }
 
     const NumBox = (props) => {
         let test = new Array();
@@ -198,7 +211,7 @@ const DayBtn = () => {
         return(
             <TouchableOpacity
                 style={btnActive === intNumber ? style.dayBtn : style.dayBtnAct}
-                onPress={() => {setBtnActive(intNumber); setSendDate(sendDate1);}} >
+                onPress={() => {setBtnActive(intNumber); setSendDate(sendDate1); }} >
                 <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
                 <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
             </TouchableOpacity>
@@ -206,6 +219,7 @@ const DayBtn = () => {
     }
 
     return(
+        <>
         <View style={{flexDirection:"row", marginLeft: width/35.4430,alignItems:"center"}}>
             <TouchableOpacity 
                 style={{marginRight: width/68.2926}}
@@ -228,6 +242,8 @@ const DayBtn = () => {
                     resizeMode="contain"/>
             </TouchableOpacity>
         </View>
+        <RecipeList navigation={navigation} day={sendDate}/>
+        </>
     );
 };
 
@@ -256,14 +272,12 @@ const SubText = props => {
 
 export default function HomeScreen({ navigation }) {
 
-    const [thermicRays, setThermicRays] = useState(0);
+    const [thermicRays, setThermicRays] = useState(1);
     const [blowing, setBlowing] = useState(1);
     const [learning, setLearning] = useState(0);
     const [actionCondtion, setActionCondition] = useState(0);
-    
-    console.log(actionCondtion[0])
-
-        const serverTest = async () => {
+        
+    const serverTest = async () => {
             const test = await axios
                 .get("http://10.0.2.2:8000/")
                 .then((res) => setActionCondition(res.data))
@@ -272,6 +286,7 @@ export default function HomeScreen({ navigation }) {
         useEffect(() => {
             serverTest();
         },[])
+
     return (
     <View style={style.homeMainBox}>
         <View style={style.homeInnerBox}>
@@ -301,8 +316,8 @@ export default function HomeScreen({ navigation }) {
             </View>
             <View style={style.homeSecondBox}>
                 <Time />
-                <DayBtn />
-                <RecipeList navigation={navigation}/>
+                <DayBtn navigation={navigation} />
+                {/* <RecipeList navigation={navigation} ></RecipeList> */}
             </View>
         </View>
     </View>
