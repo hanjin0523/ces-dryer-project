@@ -32,21 +32,48 @@ const width = Dimensions.get('window').width;
 
 const RecipeList = (props) => {
     
-    const [checked1, setChecked1] = useState(0);
+    const [checked1, setChecked1] = useState(4);
     const [stage, setStage] = useState(0);
-    const [talk, setTalk] = useState(0);
+    const [speechBubble, setSpeechBubble] = useState(0);
     const [sendRecipe, setSendRecipe] = useState([]);
-    const [aa1, setAa1] = useState(0);
+    const [recipeList, setRecipeList] = useState([]);
 
-    console.log(aa1)
+    // const recipeName = recipeList[0].slice(1,7)//레시피이름
+    // const recipeTime = recipeList[0].slice(1,7)
+    // const recipeStage = '';
+    // console.log(recipeName)
+
     const numTest = async () => {
-        const test = await axios
+        const getRecipeList = await axios
             .get("http://10.0.2.2:8000/items/"+props.day)
-            .then((res) => setAa1(res.data))
-            .catch(error => console.log(error));
+            .then((res) => 
+                setRecipeList(res.data))
+            .catch(error => alert("연결이 끊어졌습니다. 앱을 재실행해주세요"));
     }
     useEffect(()=>{
         numTest()
+    },[props.day])
+
+    const recipeTimeSum = useCallback(() =>{
+        recipeRow = [];
+        let i = 0;
+        reTimeSum = 0;
+        reStageSum = 0; 
+        reName = '';
+        console.log(recipeList[0])
+        for(let i = 0; i < recipeList.length; i++){
+            reName = recipeList[1]
+            reTimeSum += recipeList[0][2][3]
+            reStageSum += recipeList[0][0][2]
+            }
+        recipeRow.push(<RecipeStage 
+                        key={i} 
+                        name={reName} 
+                        time={reTimeSum}
+                        stage={reStageSum}></RecipeStage>)
+    return recipeRow})
+    useEffect(() => {
+        recipeTimeSum()
     },[props.day])
 
     const RecipeStage = (props) => {
@@ -57,13 +84,13 @@ const RecipeList = (props) => {
         const [button, setButton] = useState(true);
         const [button1, setButton1] = useState(true);
         
-        const time =(seconds) => {
+        const timeConversion =(seconds) => {
 
             var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
             var min = parseInt((seconds%3600)/60) < 10 ? '0'+ parseInt((seconds%3600)/60) : parseInt((seconds%3600)/60);
             var sec = seconds % 60 < 10 ? '0'+seconds % 60 : seconds % 60;
 
-            return hour+":"+min+":"+sec;
+            return hour+"시 "+min+"분 "+sec+"초";
         }
         const maxStage = (stageNum) => {
             if(stageNum < stageNumBase){
@@ -87,13 +114,13 @@ const RecipeList = (props) => {
                     iconStyle={{borderRadius:5, borderWidth:0}}
                     innerIconStyle={{borderWidth:0}}
                     style={style.checkBox1}
-                    onPress={() => {setChecked1(props.num); setStage(stageNum); setTalk(!talk)}}
+                    onPress={() => {setChecked1(props.num); setStage(stageNum); setSpeechBubble(!speechBubble)}}
                 />
                 <View style={{marginRight: width/25.1,width:width/11}}>
                     <Text style={style.recipeText}>{props.name}</Text>
                 </View>
                 <View style={{marginRight: width/13.7, width:width/10.5}}>
-                    <Text style={style.recipeText}>{props.time}</Text>
+                    <Text style={style.recipeText}>{timeConversion(props.time)}</Text>
                 </View>
                 <View style={{marginRight: width/20 ,flexDirection:"row"}}>
                     <Text style={style.recipeText}>{stageNum}</Text>
@@ -126,7 +153,7 @@ const RecipeList = (props) => {
         );
     };
     
-
+    
     return(
         <>
         <View style={style.recipeBack}>
@@ -140,23 +167,18 @@ const RecipeList = (props) => {
                 shouldIndicatorHide={false}
                 scrollIndicatorStyle={{ backgroundColor: "#753CEF", height:height/9}}
                 scrollIndicatorContainerStyle={{ backgroundColor: "#EFEDF1"}}
-                >    
-                <RecipeStage name={aa1} time="14시 21분 16초" stage={4} num={1}/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={2}/>
-                <RecipeStage name="마늘건조" time="14시 21분 16초" stage={6} num={3}/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={4}/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={5}/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={6}/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={7}/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={8}/>
-                <RecipeStage name="파프리카건조" time="07시 10분 55초" stage={5} num={9}/>
+                >
+                {/* {recipeList != 0 ?   
+                <RecipeStage name={recipeList[0][0][0]} time={recipeList[0][0][3]} stage={recipeList[0][0][2]} num={1}/>
+                : null} */}
+                {recipeTimeSum()}
             </ScrollViewIndicator>
         </View>
         <View style={style.comBtnBox}>
             <ImageBackground 
                 source={require('./assets/image/talkbuble.png')}
                 resizeMode="center"
-                style={talk ? style.talkbubble : style.talkbubbleNone}
+                style={speechBubble ? style.talkbubble : style.talkbubbleNone}
                 >
                 <Text style={style.talkText}>
                     레시피의 온도, 습도, 시간을 조정해 보세요
@@ -182,15 +204,15 @@ const DayBtn = (props, navigation) => {
     const [btnActive, setBtnActive] = useState(0);
     const [date, setDate] = useState(0);
     const [num, setNum] = useState(0);
-    const [sendDate, setSendDate] = useState(today);
-    const [select, setSelect] = useState(0);
-
     const today = new Date();
+    const sendToday = format(today, 'yyyy-MM-dd')
+    const [sendDate, setSendDate] = useState(sendToday);
+    const [select, setSelect] = useState(0);
     const year = today.getFullYear();
     const month = (today.getMonth()+1);
     const date1 = (today.getDate()-date);
     let day = ['일', '월', '화', '수', '목', '금', '토'];
-
+    
 
     // const numTest = async () => {
     //     const test = await axios
@@ -209,9 +231,9 @@ const DayBtn = (props, navigation) => {
         const daylist = (day[dayNumber.getDay()]+"요일")
 
         return(
-            <TouchableOpacity
-                style={btnActive === intNumber ? style.dayBtn : style.dayBtnAct}
-                onPress={() => {setBtnActive(intNumber); setSendDate(sendDate1); }} >
+            <TouchableOpacity key={props.num}
+                style={btnActive === props.num? style.dayBtn : style.dayBtnAct}
+                onPress={() => {setBtnActive(props.num); setSendDate(sendDate1); }} >
                 <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
                 <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
             </TouchableOpacity>
@@ -277,15 +299,15 @@ export default function HomeScreen({ navigation }) {
     const [learning, setLearning] = useState(0);
     const [actionCondtion, setActionCondition] = useState(0);
         
-    const serverTest = async () => {
-            const test = await axios
-                .get("http://10.0.2.2:8000/")
-                .then((res) => setActionCondition(res.data))
-                .catch(error => console.log(error));
-        }
-        useEffect(() => {
-            serverTest();
-        },[])
+    // const serverTest = async () => {
+    //         const test = await axios
+    //             .get("http://10.0.2.2:8000/")
+    //             .then((res) => setActionCondition(res.data))
+    //             .catch(error => console.log(error));
+    //     }
+    //     useEffect(() => {
+    //         serverTest();
+    //     },[])
 
     return (
     <View style={style.homeMainBox}>

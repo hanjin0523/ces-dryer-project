@@ -6,7 +6,7 @@ const width = Dimensions.get('window').width;
 
 const HumImg = () => {
 
-    const [humidity, setHumidity] = useState(92);
+    const [humidity, setHumidity] = useState(40);
 
     if(humidity <= 10){
     return(

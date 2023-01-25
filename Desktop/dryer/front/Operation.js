@@ -6,7 +6,7 @@ const width = Dimensions.get('window').width;
 
 const Operation  = () => {
 
-    const [operation, setOperation] = useState(100);
+    const [operation, setOperation] = useState(34);
 
     if(operation <= 10){
     return(
