@@ -51,25 +51,17 @@ def dateTest(date):
     conn.close()
     return list
 
-def jsonTest(date) :
+def getRecipeList(date) :
     conn = pymysql.connect(host='localhost',port=3306,user='jang', password='jang', db='cestest', charset='utf8')
     cur = conn.cursor()
     sql = "SELECT dr.recipeName, rl.recipeListNum, rl.recipeNum, rl.actionTime,	rl.recipeListJoin FROM recipeList rl join dryRecipe dr on rl.recipeNum = dr.recipeNum WHERE recipeListJoin = %s" 
     cur.execute(sql, date)
     
-    json = []
-    i = 0
-    while(True):
-        row = cur.fetchone()
-        if row == None:
-            break
-        data1 = row[0]
-        data2 = row[1]
-        data3 = row[2]
-        data4 = row[3]
-        data5 = row[4] 
-        i += 1
-        json.append('"%s, %s, %s, %s, %s, %d"' % (data1,data2,data3,data4,data5,i))
+    RecipeList = []
+    row = cur.fetchall()
+    for i in row:
+        RecipeList.append(row)
+    print(RecipeList)
     conn.close()
-    print(json)
-    return json
+    return RecipeList
+

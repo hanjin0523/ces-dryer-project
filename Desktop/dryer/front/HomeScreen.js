@@ -20,8 +20,10 @@ import 'react-native-gesture-handler';
 import axios from "axios"
 import { format } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContainer } from '@react-navigation/native';
 
 import TempImg from './TempImg';
+import RecipeSetting from './RecipeSetting';
 import HumImg from './HumImg';
 import Operation from './Operation'
 import Time from './Time';
@@ -30,47 +32,41 @@ import Time from './Time';
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const RecipeList = (props) => {
+const RecipeList = (props, navigation) => {
     
     const [checked1, setChecked1] = useState(4);
     const [stage, setStage] = useState(0);
     const [speechBubble, setSpeechBubble] = useState(0);
     const [sendRecipe, setSendRecipe] = useState([]);
     const [recipeList, setRecipeList] = useState([]);
-
-    // const recipeName = recipeList[0].slice(1,7)//레시피이름
-    // const recipeTime = recipeList[0].slice(1,7)
-    // const recipeStage = '';
-    // console.log(recipeName)
-
-    const numTest = async () => {
+    const getRecipe = async () => {
         const getRecipeList = await axios
-            .get("http://10.0.2.2:8000/items/"+props.day)
-            .then((res) => 
-                setRecipeList(res.data))
+            .get("http://10.0.2.2:8000/recipe/"+props.day)
+            .then((res) => setRecipeList(res.data))
             .catch(error => alert("연결이 끊어졌습니다. 앱을 재실행해주세요"));
     }
     useEffect(()=>{
-        numTest()
+        getRecipe()
     },[props.day])
 
     const recipeTimeSum = useCallback(() =>{
-        recipeRow = [];
+        let recipeRow = [];
         let i = 0;
-        reTimeSum = 0;
-        reStageSum = 0; 
-        reName = '';
-        console.log(recipeList[0])
+        let reTimeSum = 0;
+        let reStageSum = 0; 
+        let reName = '';  
         for(let i = 0; i < recipeList.length; i++){
-            reName = recipeList[1]
-            reTimeSum += recipeList[0][2][3]
-            reStageSum += recipeList[0][0][2]
+            reName = recipeList[0][1][0]
+            reTimeSum += recipeList[0][0][3]
+            reStageSum += recipeList[0][0][1]
             }
-        recipeRow.push(<RecipeStage 
+        recipeRow.push(
+                        <RecipeStage 
                         key={i} 
-                        name={reName} 
+                        name={recipeList} 
                         time={reTimeSum}
-                        stage={reStageSum}></RecipeStage>)
+                        stage={reStageSum}></RecipeStage>
+                        )
     return recipeRow})
     useEffect(() => {
         recipeTimeSum()
@@ -168,9 +164,6 @@ const RecipeList = (props) => {
                 scrollIndicatorStyle={{ backgroundColor: "#753CEF", height:height/9}}
                 scrollIndicatorContainerStyle={{ backgroundColor: "#EFEDF1"}}
                 >
-                {/* {recipeList != 0 ?   
-                <RecipeStage name={recipeList[0][0][0]} time={recipeList[0][0][3]} stage={recipeList[0][0][2]} num={1}/>
-                : null} */}
                 {recipeTimeSum()}
             </ScrollViewIndicator>
         </View>
@@ -184,7 +177,7 @@ const RecipeList = (props) => {
                     레시피의 온도, 습도, 시간을 조정해 보세요
                 </Text>
             </ImageBackground>
-            <TouchableOpacity onPress={() => {navigation.navigate('Notifications');}}>
+            <TouchableOpacity onPress={() => props.navigation.navigate('RecipeSetting')}>
                 <View style={style.comBtn}>
                     <Text style={style.comBtnText}>레시피설정</Text>
                 </View>
@@ -213,14 +206,6 @@ const DayBtn = (props, navigation) => {
     const date1 = (today.getDate()-date);
     let day = ['일', '월', '화', '수', '목', '금', '토'];
     
-
-    // const numTest = async () => {
-    //     const test = await axios
-    //         .get("http://10.0.2.2:8000/items/"+sendDate)
-    //         .then((res) => setSelect(res.data))
-    //         .catch(error => console.log(error));
-    // }
-
     const NumBox = (props) => {
         let test = new Array();
         let test1 = new Array();
@@ -264,7 +249,7 @@ const DayBtn = (props, navigation) => {
                     resizeMode="contain"/>
             </TouchableOpacity>
         </View>
-        <RecipeList navigation={navigation} day={sendDate}/>
+        <RecipeList navigation={props.navigation} day={sendDate}/>
         </>
     );
 };
@@ -339,7 +324,6 @@ export default function HomeScreen({ navigation }) {
             <View style={style.homeSecondBox}>
                 <Time />
                 <DayBtn navigation={navigation} />
-                {/* <RecipeList navigation={navigation} ></RecipeList> */}
             </View>
         </View>
     </View>

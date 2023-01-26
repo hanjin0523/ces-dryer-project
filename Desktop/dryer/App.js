@@ -9,18 +9,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import CustomSidebarMenu from './front/CustomSidebarMenu';
 import 'react-native-gesture-handler';
 import HomeScreen from './front/HomeScreen';
-import NotificationsScreen from './front/NotificationsScreen';
+import RecipeSetting from './front/RecipeSetting';
 
   const height = Dimensions.get('window').height;
   const width = Dimensions.get('window').width;
-
-function NotificationsScreen1({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Button onPress={() => navigation.goBack()} title="testBack" />
-    </View>
-  );
-}
 
 const Drawer = createDrawerNavigator();
 
@@ -29,7 +21,7 @@ export default function App() {
   return (
     <NavigationContainer >
       <Drawer.Navigator
-        initialRouteName="Home" 
+        initialRouteName="RecipeSetting" 
         drawerContent={( props ) => <CustomSidebarMenu {...props}/>} 
         screenOptions={{
           drawerType:'permanent',
@@ -78,9 +70,9 @@ export default function App() {
             style={{width: width/84.8484, height: height/54.75, marginLeft:"7%", marginBottom:"2%"}}
             />)}}
         />
-        <Drawer.Screen 
-        name="Notifications" 
-        component={NotificationsScreen} 
+        {/* <Drawer.Screen 
+        name="recipeSettin11g" 
+        component={recipeSetting} 
         options={{drawerLabel: '건조기 관리',
         drawerLabelStyle: {
           fontSize: 16,
@@ -112,10 +104,10 @@ export default function App() {
         }}
         
         
-        />
+        /> */}
         <Drawer.Screen 
-        name="Notifications1" 
-        component={NotificationsScreen1} 
+        name="RecipeSetting" 
+        component={RecipeSetting} 
         options={{drawerLabel: '레시피 설정',
         drawerLabelStyle: {
           fontSize: 16,
@@ -152,9 +144,9 @@ export default function App() {
         }}
         
         />
-        <Drawer.Screen 
-        name="Notifications2" 
-        component={NotificationsScreen1} 
+        {/* <Drawer.Screen 
+        name="recipeSettin111g" 
+        component={recipeSetting} 
         options={{drawerLabel: '데이터 관리',
         drawerLabelStyle: {
           fontSize: 16,
@@ -184,7 +176,7 @@ export default function App() {
           style={{width: width/84.8484, height: height/54.75, marginLeft:"7%", marginTop:"-4%"}}
           />)
         }}
-        />
+        /> */}
       </Drawer.Navigator>
     </NavigationContainer>
   );

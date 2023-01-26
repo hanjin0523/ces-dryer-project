@@ -37,12 +37,7 @@ def read_root():
     return re
 
 
-@app.get("/items/{date}")
-def read_item(date: str, q: Union[str, None] = None):
-    re1 = databaseMaria.jsonTest(date)
-    return re1
-
-
-@app.put("/items/{item_id}")
-def update_item(item_id: int, item: Item):
-    return {"item_name": item.name, "item_id": item_id}
+@app.get("/recipe/{date}")
+def read_recipe(date: str, q: Union[str, None] = None):
+    recipeList = databaseMaria.getRecipeList(date)
+    return recipeList
