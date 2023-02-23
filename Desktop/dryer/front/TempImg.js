@@ -99,7 +99,7 @@ export default TempImg;
 const style = StyleSheet.create({
 
     imgInnerText: {
-        fontSize: 40,
+        fontSize: 32,
         fontWeight: "bold",
         color: "black"
     },

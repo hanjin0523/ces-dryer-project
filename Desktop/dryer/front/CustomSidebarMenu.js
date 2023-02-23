@@ -20,7 +20,7 @@ const width = Dimensions.get('window').width;
 const CustomSidebarMenu = (props) => {
     const BASE_PATH ='./assets/image/';
     const proileImage = 'operationbtn.png';
-    const [dryOnOff, setDryOnOff] = useState(0);
+    const [dryOnOff, setDryOnOff] = useState();
 
     return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -34,9 +34,9 @@ const CustomSidebarMenu = (props) => {
         <DrawerContentScrollView {...props} style={{ marginLeft:"5%",height:height/20.3720, width:width/6.8651 }}>
         <DrawerItemList {...props}/>
         </DrawerContentScrollView>
-        <View style={{flexDirection:"row", marginBottom:height/20, marginLeft:width/30,alignContent:"center"}}>
+        <View style={{flexDirection:"row", marginBottom:height/65, marginLeft:width/53,alignContent:"center"}}>
         <Image source={require('./assets/image/Profilebtn.png')}/>
-        <Text style={{ fontSize: 13, textAlign: 'center', color: 'grey', marginTop:height/80, marginLeft:width/140}}>
+        <Text style={{ fontSize: 13, textAlign: 'center', color: 'grey', marginTop:height/50, marginLeft:width/140}}>
         영농조합법인페페
         </Text>
         </View>
@@ -61,8 +61,9 @@ const styles = StyleSheet.create({
     sideMenuProfileIcon: {
         resizeMode: 'center',
         width: width / 33.3333,
-        height: height / 51.5294,
+        height: height / 50.5294,
         marginLeft: width / 175,
+        marginBottom: height / 220
     },
 });
 

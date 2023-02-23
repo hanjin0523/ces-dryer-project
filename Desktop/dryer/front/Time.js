@@ -58,10 +58,10 @@ const style = StyleSheet.create({
         color: "black"
     },
     timeText: {
-        fontSize: height/55,
+        fontSize: height/54,
         fontWeight: "bold",
         color: "black",
-        lineHeight: 65,
+        lineHeight: 40,
         marginLeft: width/84.8484,
     },
 

@@ -43,7 +43,7 @@ const RecipeList = (props, navigation) => {
         const getRecipeList = await axios
             .get("http://10.0.2.2:8000/recipe/"+props.day)
             .then((res) => setRecipeList(res.data))
-            .catch(error => alert("연결이 끊어졌습니다. 앱을 재실행해주세요"));
+            .catch(error => console.log('이상!!'));
     }
     useEffect(()=>{
         getRecipe()
@@ -104,10 +104,10 @@ const RecipeList = (props, navigation) => {
             <View style={style.recipeBack1}>
                 <BouncyCheckbox
                     isChecked={checked1 === props.num}
-                    size={22}
+                    size={16}
                     fillColor="#763AFF"
                     unfillColor="#E1E3E6"
-                    iconStyle={{borderRadius:5, borderWidth:0}}
+                    iconStyle={{borderRadius:3, borderWidth:0}}
                     innerIconStyle={{borderWidth:0}}
                     style={style.checkBox1}
                     onPress={() => {setChecked1(props.num); setStage(stageNum); setSpeechBubble(!speechBubble)}}
@@ -213,14 +213,15 @@ const DayBtn = (props, navigation) => {
         const number5 = String(dayNumber)
         const sendDate1 = format(dayNumber, 'yyyy-MM-dd')
         const intNumber = number5.substring(8, 10)
+        console.log(intNumber+"인트넘"+btnActive+"btnNum")
         const daylist = (day[dayNumber.getDay()]+"요일")
 
         return(
             <TouchableOpacity key={props.num}
-                style={btnActive === props.num? style.dayBtn : style.dayBtnAct}
+                style={btnActive == props.num ? style.dayBtn : style.dayBtnAct}
                 onPress={() => {setBtnActive(props.num); setSendDate(sendDate1); }} >
-                <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
-                <Text style={btnActive != intNumber ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
+                <Text style={btnActive != props.num ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
+                <Text style={btnActive != props.num ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
             </TouchableOpacity>
         )
     }
@@ -358,11 +359,13 @@ const style = StyleSheet.create({
     },
     comBtnText1: {
         color: "#B5B3B9",
-        fontSize: 22.9   
+        fontSize: 18,
+        fontWeight: "600"   
     },
     comBtnText: {
         color: "#FFDB5E",
-        fontSize: 22.9   
+        fontSize: 18,
+        fontWeight: "600"   
     },
     comBtn1: {
         backgroundColor:"#FFFFFF",
@@ -390,21 +393,21 @@ const style = StyleSheet.create({
     },
     stageBtn: {
         marginRight: width/130,
-        marginTop: height/51.0571,
+        marginTop: height/45.0571,
         width: width/100,
         height: height/70,
     },
     recipeText: {
-        fontSize: 20, 
+        fontSize: 15, 
         color: "#A3A2A8",
-        lineHeight: 60,
+        lineHeight: 45,
         marginRight: width/250,
-        marginLeft: -width/200
+        marginLeft:  -9
     },
     recipeBack1: {
-        width: width/2.49,
+        width: width/2.38,
         height: height/17.6382,
-        marginLeft: width/33.4430,
+        marginLeft: width/55.4430,
         borderRadius: 10,
         // justifyContent: "center",
         flexDirection: "row",
@@ -412,18 +415,18 @@ const style = StyleSheet.create({
         borderBottomWidth: 1,
     },
     select1:{
-        fontSize: 20, 
+        fontSize: 16, 
         color: "black",
-        lineHeight: 55,
+        lineHeight: 45,
         marginRight: width/44.5679,
         marginLeft: width/36,
     },
     select:{
         marginLeft: width/36,
-        fontSize: 20, 
+        fontSize: 16, 
         color: "black",
-        lineHeight: 55,
-        marginRight: width/12.8927
+        lineHeight: 45,
+        marginRight: width/13.8927
     },
     checkBox1: {
         marginLeft: width/36.0679,
@@ -431,11 +434,11 @@ const style = StyleSheet.create({
         },
     recipeBack: {
         width: width/2.43,
-        height: height/18.6382,
-        marginLeft: width/33.4430,
+        height: height/16.6382,
+        marginLeft: width/42.4430,
         marginTop: height/15.52,
         backgroundColor: "#F5F6FA",
-        borderRadius: 10,
+        borderRadius: 5,
         flexDirection: "row",
     },
     listbtn1: {
@@ -455,7 +458,7 @@ const style = StyleSheet.create({
         width: width/17.9645,
         borderWidth: 1,
         borderColor: "#E5E5E5",
-        borderRadius: 10,
+        borderRadius: 5,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -467,12 +470,12 @@ const style = StyleSheet.create({
         marginRight: width/52.8301
     },
     BoxText : {
-        fontSize: 22,
+        fontSize: 15,
         fontWeight: "bold",
         color: "#D0D0D4",
     },
     BoxTextAct : {
-        fontSize: 22,
+        fontSize: 15,
         fontWeight: "bold",
         color: "#FFFFFF",
     },
@@ -485,7 +488,7 @@ const style = StyleSheet.create({
         width: width/18.0645,
         borderWidth: 1,
         borderColor: "#E5E5E5",
-        borderRadius: 10,
+        borderRadius: 5,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -531,9 +534,9 @@ const style = StyleSheet.create({
     },
     BoxTitleMini: {
         fontSize: height/55,
-        lineHeight: 60,
+        lineHeight: 43,
         color: "black",
-        marginLeft: -10,
+        marginLeft: -7,
     },
     OnOffBox: {
         flexDirection: "row",
@@ -544,28 +547,28 @@ const style = StyleSheet.create({
     },
     OnOffImg: {
         width: width/41.7910,
-        height: height/48.6666,
+        height: height/41.6666,
         marginLeft: width/270.3333,
         marginRight: width/78.6756
     },
     OnOffText: {
-        fontSize: 16,
+        fontSize: 13,
         color: "black",
     },
     subText: {
-        flexDirection: "row"
+        flexDirection: "row",
+        marginLeft: -5  
     },
     main: {
-        fontSize: 25,
+        fontSize: 18,
         fontWeight:"bold",
-        marginRight: width/170,
+        marginRight: 10,
         color: "black"
     },
     sub: {
-        fontSize: 15,
-        lineHeight: 40,
-        marginRight: width/38,
+        fontSize: 12,
+        lineHeight: 25,
+        marginRight: 40,
         color: "black"
     },
-    
-  })
+})

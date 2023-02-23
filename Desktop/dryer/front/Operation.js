@@ -26,7 +26,7 @@ const Operation  = () => {
                 style={style.waitImg}
                 resizeMode="contain">
                 <Text style={style.imgInnerText}>{operation}
-                    <Text style={{fontSize:62,}}>%</Text>
+                    <Text style={{fontSize:50,}}>%</Text>
                 </Text>    
             </ImageBackground>
         )}
@@ -48,7 +48,7 @@ const Operation  = () => {
                     style={style.waitImg}
                     resizeMode="contain">
                     <Text style={style.imgInnerText}>{operation}
-                        <Text style={{fontSize:62,}}>%</Text>
+                        <Text style={style.imgMiniText}>%</Text>
                     </Text>    
                 </ImageBackground>
             )}
@@ -59,7 +59,7 @@ const Operation  = () => {
                     style={style.waitImg}
                     resizeMode="contain">
                     <Text style={style.imgInnerText}>{operation}
-                        <Text style={{fontSize:40,}}>%</Text>
+                        <Text style={style.imgMiniText}>%</Text>
                     </Text>    
                 </ImageBackground>
             )}
@@ -70,7 +70,7 @@ const Operation  = () => {
                     style={style.waitImg}
                     resizeMode="contain">
                     <Text style={style.imgInnerText}>{operation}
-                        <Text style={{fontSize:62,}}>%</Text>
+                        <Text style={style.imgMiniText}>%</Text>
                     </Text>    
                 </ImageBackground>
             )}
@@ -95,8 +95,11 @@ const style = StyleSheet.create({
         alignItems: "center",
     },
     imgInnerText: {
-        fontSize: 62,
+        fontSize: 50,
         fontWeight: "bold",
         color: "black"
     },
+    imgMiniText: {
+        fontSize : 50
+    }
 })
