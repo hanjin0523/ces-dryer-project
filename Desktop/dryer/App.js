@@ -26,7 +26,7 @@ const App = () => {
     <Provider store={store}>
       <NavigationContainer >
         <Drawer.Navigator
-          initialRouteName="RecipeSetting" 
+          initialRouteName="Home" 
           drawerContent={( props ) => <CustomSidebarMenu {...props}/>} 
           screenOptions={{
             drawerType:'permanent',
@@ -76,7 +76,7 @@ const App = () => {
               style={{width: width/70.8484, height: height/40.75, marginLeft:"7%"}}
               />)}}
           />
-          <Drawer.Screen 
+          {/* <Drawer.Screen 
           name="recipeSettin11g" 
           component={RecipeSetting} 
           options={{drawerLabel: '건조기 관리',
@@ -108,10 +108,7 @@ const App = () => {
               require('./front/assets/image/drybtnOff.png')}
               style={{width: width/70.8484, height: height/40.75, marginLeft:"7%"}}
             />)
-          }}
-          
-          
-          />
+          }}/> */}
           <Drawer.Screen 
           name="RecipeSetting" 
           component={RecipeSetting} 
@@ -147,7 +144,7 @@ const App = () => {
           }}
           
           />
-          <Drawer.Screen 
+          {/* <Drawer.Screen 
           name="recipeSettin111g" 
           component={RecipeSetting} 
           options={{drawerLabel: '데이터 관리',
@@ -180,7 +177,7 @@ const App = () => {
               style={{width: width/70.8484, height: height/40.75, marginLeft:"7%"}}
             />)
           }}
-          />
+          /> */}
         </Drawer.Navigator>
       </NavigationContainer>
     </Provider>

@@ -1,5 +1,5 @@
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,10 +10,10 @@ app = FastAPI()
 
 origins = [
     "http://localhost",
+    "http://localhost:8111",
     "http://localhost:8081",
-    "http://localhost:8000",
-    "http://192.168.64.4:8000",
-    "http://192.168.64.4:3000",
+    "http://192.168.64.4:8111",
+    "http://192.168.64.4:8081",
     "http://192.168.64.4",
 ]
 
@@ -33,11 +33,17 @@ class Item(BaseModel):
 
 @app.get("/")
 def read_root():
-    re = databaseMaria.dbtest()
+    re = "바보"
     return re
 
 
-@app.get("/recipe/{date}")
-def read_recipe(date: str, q: Union[str, None] = None):
-    recipeList = databaseMaria.getRecipeList(date)
-    return recipeList
+@app.get("/dryList")
+def dryList():
+    dryList = databaseMaria.getDryList()
+    return dryList
+
+@app.get("/getDryRecipe")
+async def getDryRecipe(param : int = Query(..., gt=0)): 
+    dryRecipe = databaseMaria.getDryRecipe(param)
+    print(dryRecipe)
+    return dryRecipe

@@ -6,26 +6,31 @@ const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
 const RadialVariant = () => {
-  
   const [speed, setSpeed] = useState(0);
 
+  const increaseSpeed = () => {
+    setSpeed(speed + 5); // speed 상태값을 5 증가시킵니다.
+  };
+
+  const decreaseSpeed = () => {
+    setSpeed(speed - 5); // speed 상태값을 5 감소시킵니다.
+  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        onPress={() => setSpeed(speed-5)}
-        >
-      <Image 
-        source={require('./assets/image/settingView/minusButton.png')} 
-        resizeMode="center"
-        style={styles.decreaseButton}/>
+      <TouchableOpacity onPress={decreaseSpeed}>
+        <Image 
+          source={require('./assets/image/settingView/minusButton.png')} 
+          resizeMode="center"
+          style={styles.decreaseButton}/>
       </TouchableOpacity>
       <View style={{width:100,height:30,position:"absolute",marginTop:-70}}>
         <Text style={{marginLeft:30,fontSize:25, color:"black",fontWeight:"500"}}>40<Text style={{fontSize:14}}>°C</Text></Text>
       </View>
       <View style={{width:470,height:30,position:"absolute",marginTop:140,marginRight:0}}>
         <Text style={{fontSize:25, color:"black",fontWeight:"500"}}>20<Text style={{fontSize:14}}>°C</Text></Text>
-      </View><View style={{width:500,height:30,position:"absolute",marginTop:140}}>
+      </View>
+      <View style={{width:500,height:30,position:"absolute",marginTop:140}}>
         <Text style={{fontSize:25, color:"black",fontWeight:"500",marginLeft:450}}>80<Text style={{fontSize:14}}>°C</Text></Text>
       </View>
       <RadialSlider
@@ -50,7 +55,7 @@ const RadialVariant = () => {
                         { offset: '100%', color: '#FF7345' }]}
       />
       <View style={styles.circle}></View>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={increaseSpeed}>
         <Image 
           source={require('./assets/image/settingView/plusButton.png')} 
           resizeMode="center"
@@ -59,6 +64,7 @@ const RadialVariant = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   mainCircle: {

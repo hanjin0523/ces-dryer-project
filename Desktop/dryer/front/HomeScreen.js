@@ -27,61 +27,38 @@ import RecipeSetting from './RecipeSetting';
 import HumImg from './HumImg';
 import Operation from './Operation'
 import Time from './Time';
+import config, { FRONT_URL, PORT } from './config'
 
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
 const RecipeList = (props, navigation) => {
+
     
-    const [checked1, setChecked1] = useState(4);
     const [stage, setStage] = useState(0);
     const [speechBubble, setSpeechBubble] = useState(0);
     const [sendRecipe, setSendRecipe] = useState([]);
     const [recipeList, setRecipeList] = useState([]);
-    const getRecipe = async () => {
-        const getRecipeList = await axios
-            .get("http://10.0.2.2:8000/recipe/"+props.day)
-            .then((res) => setRecipeList(res.data))
-            .catch(error => console.log('이상!!'));
-    }
-    useEffect(()=>{
-        getRecipe()
-    },[props.day])
 
-    const recipeTimeSum = useCallback(() =>{
-        let recipeRow = [];
-        let i = 0;
-        let reTimeSum = 0;
-        let reStageSum = 0; 
-        let reName = '';  
-        for(let i = 0; i < recipeList.length; i++){
-            reName = recipeList[0][1][0]
-            reTimeSum += recipeList[0][0][3]
-            reStageSum += recipeList[0][0][1]
-            }
-        recipeRow.push(
-                        <RecipeStage 
-                        key={i} 
-                        name={recipeList} 
-                        time={reTimeSum}
-                        stage={reStageSum}></RecipeStage>
-                        )
-    return recipeRow})
-    useEffect(() => {
-        recipeTimeSum()
-    },[props.day])
-
-    const RecipeStage = (props) => {
+    const RecipeStage = ({props}) => {
         
-        const stageNumBase = props.stage
-
-        const [stageNum, setStageNum] = useState(stageNumBase);
+        const [checked1, setChecked1] = useState('');
         const [button, setButton] = useState(true);
         const [button1, setButton1] = useState(true);
+        const [getDryRecipe, setGetDryRecipe] = useState('');
+        const [stageNum, setStageNum] = useState(0);
+        const [stageNumBase, setStageNumBase] = useState(0);
         
+        const fetchDryRecipe = async (param) => {
+            const dryRecipeResponse = await axios.get(`http://${FRONT_URL}${PORT}/getDryRecipe?param=${param}`);
+            setGetDryRecipe(dryRecipeResponse.data);
+        };
+        console.log(getDryRecipe,"모르겠다")
+        useEffect(() => {
+            fetchDryRecipe(props);
+        }, []);
         const timeConversion =(seconds) => {
-
             var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
             var min = parseInt((seconds%3600)/60) < 10 ? '0'+ parseInt((seconds%3600)/60) : parseInt((seconds%3600)/60);
             var sec = seconds % 60 < 10 ? '0'+seconds % 60 : seconds % 60;
@@ -98,28 +75,29 @@ const RecipeList = (props, navigation) => {
                 setStageNum(stageNum-1)
             }
         }
-        
-        
+        if (!props) {
+            return null;
+        }
         return(
             <View style={style.recipeBack1}>
                 <BouncyCheckbox
-                    isChecked={checked1 === props.num}
+                    isChecked={checked1}
                     size={16}
                     fillColor="#763AFF"
                     unfillColor="#E1E3E6"
                     iconStyle={{borderRadius:3, borderWidth:0}}
                     innerIconStyle={{borderWidth:0}}
                     style={style.checkBox1}
-                    onPress={() => {setChecked1(props.num); setStage(stageNum); setSpeechBubble(!speechBubble)}}
+                    onPress={() => {setChecked1(!checked1);}}
                 />
                 <View style={{marginRight: width/25.1,width:width/11}}>
-                    <Text style={style.recipeText}>{props.name}</Text>
+                    <Text style={style.recipeText}>{getDryRecipe[0]}</Text>
                 </View>
                 <View style={{marginRight: width/13.7, width:width/10.5}}>
-                    <Text style={style.recipeText}>{timeConversion(props.time)}</Text>
+                    <Text style={style.recipeText}>{timeConversion(getDryRecipe[3])}</Text>
                 </View>
                 <View style={{marginRight: width/20 ,flexDirection:"row"}}>
-                    <Text style={style.recipeText}>{stageNum}</Text>
+                    <Text style={style.recipeText}>{getDryRecipe[2]}</Text>
                     <TouchableOpacity activeOpacity={1}
                         onPressIn={() => setButton1(false)}
                         onPressOut={() => setButton1(true)} 
@@ -149,7 +127,6 @@ const RecipeList = (props, navigation) => {
         );
     };
     
-    
     return(
         <>
         <View style={style.recipeBack}>
@@ -164,22 +141,22 @@ const RecipeList = (props, navigation) => {
                 scrollIndicatorStyle={{ backgroundColor: "#753CEF", height:height/9}}
                 scrollIndicatorContainerStyle={{ backgroundColor: "#EFEDF1"}}
                 >
-                {recipeTimeSum()}
+                <RecipeStage props={props.props}/>
             </ScrollViewIndicator>
         </View>
         <View style={style.comBtnBox}>
             <ImageBackground 
                 source={require('./assets/image/talkbuble.png')}
-                resizeMode="center"
+                resizeMode="cover"
                 style={speechBubble ? style.talkbubble : style.talkbubbleNone}
                 >
-                <Text style={style.talkText}>
+                <Text style={speechBubble ? style.talkText : null}>
                     레시피의 온도, 습도, 시간을 조정해 보세요
                 </Text>
             </ImageBackground>
             <TouchableOpacity onPress={() => props.navigation.navigate('RecipeSetting')}>
                 <View style={style.comBtn}>
-                    <Text style={style.comBtnText}>레시피설정</Text>
+                    <Text style={style.comBtnText}>건조 시작</Text>
                 </View>
             </TouchableOpacity>
             <TouchableOpacity>
@@ -192,65 +169,52 @@ const RecipeList = (props, navigation) => {
     );
 };
 
-const DayBtn = (props, navigation) => {
+const DayBtn = ({ navigation, setDate }) => {
+    const [dryList, setDryList] = useState([]);
+    const [btnActive, setBtnActive] = useState(1);
+    const [getDryRecipe, setGetDryRecipe] = useState([]);
 
-    const [btnActive, setBtnActive] = useState(0);
-    const [date, setDate] = useState(0);
-    const [num, setNum] = useState(0);
-    const today = new Date();
-    const sendToday = format(today, 'yyyy-MM-dd')
-    const [sendDate, setSendDate] = useState(sendToday);
-    const [select, setSelect] = useState(0);
-    const year = today.getFullYear();
-    const month = (today.getMonth()+1);
-    const date1 = (today.getDate()-date);
-    let day = ['일', '월', '화', '수', '목', '금', '토'];
+    const fetchDryList = async () => {
+        const dryListResponse = await axios.get(`http://${FRONT_URL}${PORT}/dryList`);
+        setDryList(dryListResponse.data);
+    };
     
-    const NumBox = (props) => {
-        let test = new Array();
-        let test1 = new Array();
-        const dayNumber = new Date(year, month-1,(date1-props.num))
-        const number5 = String(dayNumber)
-        const sendDate1 = format(dayNumber, 'yyyy-MM-dd')
-        const intNumber = number5.substring(8, 10)
-        console.log(intNumber+"인트넘"+btnActive+"btnNum")
-        const daylist = (day[dayNumber.getDay()]+"요일")
+    
+    
+    useEffect(() => {
+        fetchDryList();
+    }, []);
 
-        return(
-            <TouchableOpacity key={props.num}
-                style={btnActive == props.num ? style.dayBtn : style.dayBtnAct}
-                onPress={() => {setBtnActive(props.num); setSendDate(sendDate1); }} >
-                <Text style={btnActive != props.num ? style.BoxText : style.BoxTextAct}>{daylist}</Text>
-                <Text style={btnActive != props.num ? style.BoxText : style.BoxTextAct}>{intNumber}</Text>
-            </TouchableOpacity>
-        )
-    }
+    const dryListElements = dryList.map((item, idx) => (
+        <TouchableOpacity
+            key={idx}
+            style={btnActive == idx+1 ? style.dayBtn : style.dayBtnAct}
+            onPress={() => {setBtnActive(idx+1);}}>
+            <Text style={btnActive != idx+1 ? style.BoxText : style.BoxTextAct}>{item[1]}</Text>
+        </TouchableOpacity>
+    ));
 
-    return(
+    return (
         <>
-        <View style={{flexDirection:"row", marginLeft: width/35.4430,alignItems:"center"}}>
-            <TouchableOpacity 
-                style={{marginRight: width/68.2926}}
-                onPress={()=>setDate(date+1)}>
-                <Image 
-                    source={require('./assets/image/listbtn.png')} 
-                    style={style.listbtn}
-                    resizeMode="contain"/>
-            </TouchableOpacity>
-                <NumBox num={4}/>
-                <NumBox num={3}/>
-                <NumBox num={2}/>
-                <NumBox num={1}/>
-                <NumBox num={0}/>
-            <TouchableOpacity style={{marginLeft: -width/300}}
-                onPress={()=>setDate(date-1)}>
-                <Image 
-                    source={require('./assets/image/listbtnR.png')} 
-                    style={style.listbtn1}
-                    resizeMode="contain"/>
-            </TouchableOpacity>
-        </View>
-        <RecipeList navigation={props.navigation} day={sendDate}/>
+            <View style={{ flexDirection: "row", marginLeft: width / 35.4430, alignItems: "center" }}>
+                <TouchableOpacity
+                    style={{ marginRight: width / 68.2926 }}
+                    onPress={() => setDate(1)}>
+                    <Image
+                        source={require('./assets/image/listbtn.png')}
+                        style={style.listbtn}
+                        resizeMode="contain" />
+                </TouchableOpacity>
+                <View style={style.dryListBtn}>{dryListElements}</View>
+                <TouchableOpacity style={{ marginLeft: width / 2.52, position: 'absolute' }}
+                    onPress={() => setDate(1)}>
+                    <Image
+                        source={require('./assets/image/listbtnR.png')}
+                        style={style.listbtn1}
+                        resizeMode="contain" />
+                </TouchableOpacity>
+            </View>
+            <RecipeList style={style.recipeListMain} navigation={navigation} props={btnActive}/>
         </>
     );
 };
@@ -285,16 +249,6 @@ export default function HomeScreen({ navigation }) {
     const [learning, setLearning] = useState(0);
     const [actionCondtion, setActionCondition] = useState(0);
         
-    // const serverTest = async () => {
-    //         const test = await axios
-    //             .get("http://10.0.2.2:8000/")
-    //             .then((res) => setActionCondition(res.data))
-    //             .catch(error => console.log(error));
-    //     }
-    //     useEffect(() => {
-    //         serverTest();
-    //     },[])
-
     return (
     <View style={style.homeMainBox}>
         <View style={style.homeInnerBox}>
@@ -331,31 +285,33 @@ export default function HomeScreen({ navigation }) {
     );
 }
 const style = StyleSheet.create({
+    recipeListMain: {
+        flex : 1,
+        justifyContent: 'center',
+        alignItems:'center'
+    },
+    dryListBtn: {
+        flexDirection:"row",
+    },
     talkText: {
-        lineHeight: 55,
+        lineHeight: 35,
         color: "#67656E",
-        marginLeft: 10,
-        marginRight: 10,
+        marginLeft: 0,
+        marginRight: 0,
         fontSize: 13,
     },
     talkbubble: {
         height: height/15, 
-        width: width/5, 
+        width: width/4.9, 
         position: "absolute", 
-        alignItems: "center",
+        alignItems: 'center',
         zIndex:1,
-        paddingLeft: 10,
-        paddingRight: 10,
+        paddingLeft: 0,
+        paddingRight: 0,
+        marginTop: 3,
     },
     talkbubbleNone: {
-        height: height/15, 
-        width: width/5, 
-        position: "absolute", 
-        alignItems: "center",
-        zIndex:1,
-        paddingLeft: 10,
-        paddingRight: 10,
-        display: 'none'
+        display:'none'
     },
     comBtnText1: {
         color: "#B5B3B9",
@@ -379,7 +335,7 @@ const style = StyleSheet.create({
         marginTop: height/67.3846
     },
     comBtnBox: {
-        flexDirection:"column",
+        flexDirection:"column", 
         alignItems: "center",
     },
     comBtn: {
@@ -393,14 +349,14 @@ const style = StyleSheet.create({
     },
     stageBtn: {
         marginRight: width/130,
-        marginTop: height/45.0571,
-        width: width/100,
-        height: height/70,
+        marginTop: height/56.0571,
+        width: width/90,
+        height: height/50,
     },
     recipeText: {
         fontSize: 15, 
         color: "#A3A2A8",
-        lineHeight: 45,
+        lineHeight: 41,
         marginRight: width/250,
         marginLeft:  -9
     },
@@ -429,9 +385,9 @@ const style = StyleSheet.create({
         marginRight: width/13.8927
     },
     checkBox1: {
-        marginLeft: width/36.0679,
-        marginRight: width/400.3333
-        },
+        marginLeft: width/31.0679,
+        marginRight: 0
+    },
     recipeBack: {
         width: width/2.43,
         height: height/16.6382,
@@ -470,12 +426,12 @@ const style = StyleSheet.create({
         marginRight: width/52.8301
     },
     BoxText : {
-        fontSize: 15,
+        fontSize: 14.1,
         fontWeight: "bold",
         color: "#D0D0D4",
     },
     BoxTextAct : {
-        fontSize: 15,
+        fontSize: 14.1,
         fontWeight: "bold",
         color: "#FFFFFF",
     },
@@ -497,13 +453,14 @@ const style = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 10,
-        marginRight: width/52.8301
+        marginRight: width/52.8301,
+        textAlign: 'center'
     },
     homeMainBox: {
         flex: 1, 
         alignItems: 'flex-end', 
         justifyContent: 'center', 
-        backgroundColor: '#EFEAFF' 
+        backgroundColor: '#EFEAFF'
     },
     homeInnerBox: {
         width : width/1.3011,

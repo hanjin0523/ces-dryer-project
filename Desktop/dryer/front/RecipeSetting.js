@@ -13,62 +13,89 @@ import RecipeCustum from './RecipeCustum'
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-
 const Dial = () => {
-  const { todos } = useSelector(state => state.todos);
-  const dispatch = useDispatch();
-  console.log(todos+'다이얼값')
+
   const [temp, setTemp] = useState(0);
+  const hum = 10;
+  const time = "08:10";
+  console.log(temp,"temp")
+  const increase = () => {
+    setTemp(temp + 5);
+  };
+
+  const decrease = () => {
+    setTemp(temp => temp - 5); // speed 상태값을 5 감소시킵니다.
+  };
+
   return(
+    <>
+      <View style={styles.tempHumTimeBox}>
+        <Image 
+              source={require("./assets/image/settingView/tempView.png")} 
+              resizeMode="contain"
+              style={styles.tempIcon}/>
+        <Text style={styles.tempText}>{temp}<Text style={{fontSize:18}}>°C</Text></Text>
+        <Image 
+              source={require("./assets/image/settingView/humView.png")} 
+              resizeMode="contain"
+              style={styles.tempIcon}/>
+        <Text style={styles.tempText}>{hum}<Text style={{fontSize:18}}>%</Text></Text>
+        <Image 
+              source={require("./assets/image/settingView/timeView.png")} 
+              resizeMode="contain"
+              style={styles.tempIcon}/>
+        <Text style={styles.tempText}>{time}</Text>
+      </View>
     <View style={styles.container}>
-            <TouchableOpacity 
-              onPress={() => dispatch(minusNum())}
-            >
-              <Image 
-                source={require('./assets/image/settingView/minusButton.png')} 
-                resizeMode="center"
-                style={styles.decreaseButton}/>
-            </TouchableOpacity>
-            <View style={{width:100,height:30,position:"absolute",marginTop:-70}}>
-              <Text style={{marginLeft:30,fontSize:20, color:"black",fontWeight:"500"}}>40<Text style={{fontSize:14}}>°C</Text></Text>
-            </View>
-            <View style={{width:470,height:30,position:"absolute",marginTop:90,marginRight:0}}>
-              <Text style={{fontSize:20, color:"black",fontWeight:"500", marginLeft:50}}>20<Text style={{fontSize:14}}>°C</Text></Text>
-            </View>
-            <View style={{width:500,height:30,position:"absolute",marginTop:90}}>
-              <Text style={{fontSize:20, color:"black",fontWeight:"500",marginLeft:400}}>80<Text style={{fontSize:14}}>°C</Text></Text>
-            </View>
-            <RadialSlider
-              style={styles.mainCircle}
-              step={2}
-              variant={'radial-circle-slider'}
-              value={todos}
-              valueStyle={{fontSize:60,color:"black",alignItems:"center",justifyContent:"center", marginTop:20}}
-              min={10}
-              max={80}
-              onChange={(e)=>dispatch(updateNum(e))}
-              radius={123}
-              isHideSubtitle={Boolean}
-              isHideTitle={Boolean} 
-              unit={'°C'}
-              unitStyle={{marginLeft:0,fontWeight:"bold",marginTop:35}}
-              thumbColor={'#FF7345'}
-              thumbRadius={11}
-              thumbBorderWidth={5}
-              sliderWidth={7}
-              linearGradient ={[ { offset: '0%', color:'#FFD76F' }, 
-                              { offset: '100%', color: '#FF7345' }]}
-            />
-            <View style={styles.circle}></View>
-            <TouchableOpacity
-              onPress={() => dispatch(plusNum())}
-            >
-              <Image 
-                source={require('./assets/image/settingView/plusButton.png')} 
-                resizeMode="center"
-                style={styles.increaseButton}/>
-            </TouchableOpacity>
-          </View>
+      <TouchableOpacity 
+        onPress={decrease}
+      >
+        <Image 
+          source={require('./assets/image/settingView/minusButton.png')} 
+          resizeMode="center"
+          style={styles.decreaseButton}/>
+      </TouchableOpacity>
+      <View style={{width:100,height:30,position:"absolute",marginTop:-70}}>
+        <Text style={{marginLeft:30,fontSize:20, color:"black",fontWeight:"500"}}>40<Text style={{fontSize:14}}>°C</Text></Text>
+      </View>
+      <View style={{width:470,height:30,position:"absolute",marginTop:90,marginRight:0}}>
+        <Text style={{fontSize:20, color:"black",fontWeight:"500", marginLeft:50}}>20<Text style={{fontSize:14}}>°C</Text></Text>
+      </View>
+      <View style={{width:500,height:30,position:"absolute",marginTop:90}}>
+        <Text style={{fontSize:20, color:"black",fontWeight:"500",marginLeft:400}}>80<Text style={{fontSize:14}}>°C</Text></Text>
+      </View>
+      <RadialSlider props={temp}
+        style={styles.mainCircle}
+        step={3}
+        variant={'radial-circle-slider'}
+        value={temp}
+        valueStyle={{fontSize:60,color:"black",alignItems:"center",justifyContent:"center", marginTop:20}}
+        min={10}
+        max={80}
+        onChange={setTemp}
+        radius={123}
+        isHideSubtitle={Boolean}
+        isHideTitle={Boolean} 
+        unit={'°C'}
+        unitStyle={{marginLeft:0,fontWeight:"bold",marginTop:35}}
+        thumbColor={'#FF7345'}
+        thumbRadius={11}
+        thumbBorderWidth={5}
+        sliderWidth={7}
+        linearGradient ={[ { offset: '0%', color:'#FFD76F' }, 
+                        { offset: '100%', color: '#FF7345' }]}
+      />
+      <View style={styles.circle}></View>
+      <TouchableOpacity
+        onPress={increase}
+      >
+        <Image 
+          source={require('./assets/image/settingView/plusButton.png')} 
+          resizeMode="center"
+          style={styles.increaseButton}/>
+      </TouchableOpacity>
+    </View>
+    </>
   );
 };
 
@@ -76,7 +103,6 @@ const Dial = () => {
 export default function RecipeSetting({ navigation }) {
 
   const { todos } = useSelector(state => state.todos);
-  console.log(todos+"메인부 출력")
   const minTemp = 20;
   const hum = 10;
   const time = "08:10";
@@ -126,24 +152,7 @@ export default function RecipeSetting({ navigation }) {
                   레시피 설정
               </Text>
             </View>
-            <View style={styles.tempHumTimeBox}>
-              <Image 
-                    source={require("./assets/image/settingView/tempView.png")} 
-                    resizeMode="contain"
-                    style={styles.tempIcon}/>
-              <Text style={styles.tempText}>{todos}<Text style={{fontSize:18}}>°C</Text></Text>
-              <Image 
-                    source={require("./assets/image/settingView/humView.png")} 
-                    resizeMode="contain"
-                    style={styles.tempIcon}/>
-              <Text style={styles.tempText}>{hum}<Text style={{fontSize:18}}>%</Text></Text>
-              <Image 
-                    source={require("./assets/image/settingView/timeView.png")} 
-                    resizeMode="contain"
-                    style={styles.tempIcon}/>
-              <Text style={styles.tempText}>{time}</Text>
-            </View>
-            <Dial props={todos}/>
+            <Dial/>
             <View style={styles.controlBox}>
               <SelectActive num={1} name="temp"/>
               <SelectActive num={2} name="hum"/>

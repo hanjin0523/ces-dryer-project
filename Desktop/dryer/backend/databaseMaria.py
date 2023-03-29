@@ -1,67 +1,47 @@
 import pymysql
 
-def is_connected(connection):
-    try:
-        connection.ping()
-    except:
-        return False
-    return True
-def dbtest():
-#메인코드 유저테이블데이터에서 뽑아오는 쿼리날리기
-    conn = pymysql.connect(host='localhost',port=3306,user='jang', password='jang', db='cestest', charset='utf8')
+def connect_db():
+    conn = pymysql.connect(
+        host='localhost',
+        port=3306,
+        user='jang',
+        password='jang',
+        db='cestest',
+        charset='utf8'
+    )
+    return conn
+
+def getDryList():
+    # 등록레시피이름 뽑아오는 쿼리날리기
+    conn = connect_db()
     cur = conn.cursor()
-    sql = "SELECT dr.recipeName , dr.recipeNum ,rl.recipeListNum ,rl.recipeTem ,rl.recipeHum , rl.actionTime , rl.recipeListJoin  FROM recipeList rl join dryRecipe dr on rl.recipeNum = dr.recipeNum WHERE rl.recipeNum = 1"
+    sql ="SELECT dt.dry_number , dt.dried_product_name  FROM drying_table as dt"
     cur.execute(sql)
-    i = 0
-    recipes = []
-    while(True): 
-        row = cur.fetchone()
-        if row==None:
-            break
-        data1 = row[0]
-        data2 = row[1]
-        data3 = row[2]
-        data4 = row[3]
-        data5 = row[4] 
-        data6 = row[5]
-        data7 = row[6]
-        i += 1
-        print("%5s %5d %5d %d %d %s %s %d" % (data1,data2,data3,data4,data5,data6,data7,i))
-        recipes.append("%5s %5d %5d %d %d %s %s %d" % (data1,data2,data3,data4,data5,data6,data7,i))
+    dry_list = cur.fetchall()
+    arr_dry = list(dry_list)
+    print(arr_dry)
     conn.close()
-    return recipes
+    return arr_dry
 
-def dateTest(date):
-    conn = pymysql.connect(host='localhost',port=3306,user='jang', password='jang', db='cestest', charset='utf8')
+def getDryRecipe(param):
+    # Construct the value of dry_number using the param argument
+    dry_number = f'num{param}'
+    # 레시피의 상세 가동여부 뽑아오는 쿼리
+    conn = connect_db()
     cur = conn.cursor()
-    sql = "SELECT * FROM recipeList rl WHERE recipeListJoin = %s"
-    cur.execute(sql, date)
-    list = []
-    while(True):
-        row = cur.fetchone()
-        if row == None:
-            break
-        data1 = row[0]
-        data2 = row[1]
-        data3 = row[2]
-        data4 = row[3]
-        data5 = row[4] 
-        data6 = row[5]
-        list.append("%d %d %d %d %s %s" % (data1,data2,data3,data4,data5,data6))
+    sql ='''SELECT 
+                dt.dried_product_name ,
+                rt.dry_number, SUM(numbering) AS total_stage_number,
+                SEC_TO_TIME(SUM(TIME_TO_SEC(uptime))) AS total_uptime
+            FROM recipe_table rt 
+            JOIN drying_table dt 
+            ON dt.dry_number = rt.dry_number  
+            WHERE dt.dry_number = %s
+            GROUP BY dt.dry_number; '''
+    cur.execute(sql, (dry_number,))
+    dry_list = cur.fetchone()
+    arr_dry = list(dry_list)
+    print(arr_dry[1])
     conn.close()
-    return list
-
-def getRecipeList(date) :
-    conn = pymysql.connect(host='localhost',port=3306,user='jang', password='jang', db='cestest', charset='utf8')
-    cur = conn.cursor()
-    sql = "SELECT dr.recipeName, rl.recipeListNum, rl.recipeNum, rl.actionTime,	rl.recipeListJoin FROM recipeList rl join dryRecipe dr on rl.recipeNum = dr.recipeNum WHERE recipeListJoin = %s" 
-    cur.execute(sql, date)
-    
-    RecipeList = []
-    row = cur.fetchall()
-    for i in row:
-        RecipeList.append(row)
-    print(RecipeList)
-    conn.close()
-    return RecipeList
+    return arr_dry
 
