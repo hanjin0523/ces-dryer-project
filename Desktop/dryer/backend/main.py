@@ -44,6 +44,16 @@ def dryList():
 
 @app.get("/getDryRecipe")
 async def getDryRecipe(param : int = Query(..., gt=0)): 
-    dryRecipe = databaseMaria.getDryRecipe(param)
-    print(dryRecipe)
-    return dryRecipe
+    try:
+        dryRecipe = databaseMaria.getDryRecipe(param)
+    except:
+        dryRecipe = ["레시피 등록해주세요",0,0,"레시피 등록해주세요"]
+    return dryRecipe     
+
+@app.get("/stageModify")
+async def stageModify(stageValue : int , dryNum:str): 
+    try:
+        stageList = databaseMaria.stageModify(stageValue,dryNum)
+    except:
+        stageList = [0,"망고망고"]
+    return stageList   

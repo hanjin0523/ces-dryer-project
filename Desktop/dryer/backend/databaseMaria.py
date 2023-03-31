@@ -23,9 +23,9 @@ def getDryList():
     conn.close()
     return arr_dry
 
-def getDryRecipe(param):
+def getDryRecipe(dry_number):
     # Construct the value of dry_number using the param argument
-    dry_number = f'num{param}'
+    dry_number = f'num{dry_number}'
     # 레시피의 상세 가동여부 뽑아오는 쿼리
     conn = connect_db()
     cur = conn.cursor()
@@ -40,8 +40,25 @@ def getDryRecipe(param):
             GROUP BY dt.dry_number; '''
     cur.execute(sql, (dry_number,))
     dry_list = cur.fetchone()
-    arr_dry = list(dry_list)
-    print(arr_dry[1])
+    recipeList = list(dry_list)
+    print(recipeList)
     conn.close()
-    return arr_dry
+    return recipeList
 
+def stageModify(stage_num:int, dry_number:str):
+    # Construct the value of dry_number using the param argument
+    # 레시피의 상세 가동여부 뽑아오는 쿼리
+    conn = connect_db()
+    cur = conn.cursor()
+    sql ='''SELECT 
+                rt.dry_number,
+                SEC_TO_TIME(SUM(CASE WHEN rt.stage_number <= (0+%s) THEN TIME_TO_SEC(rt.uptime) ELSE 0 END)) AS total_uptime_below_3
+            FROM recipe_table rt
+            WHERE rt.dry_number = %s
+            GROUP BY rt.dry_number; '''
+    cur.execute(sql, (stage_num,dry_number))
+    dry_list = cur.fetchone()
+    stage_list = list(dry_list)
+    print(stage_list)
+    conn.close()
+    return stage_list

@@ -33,99 +33,118 @@ import config, { FRONT_URL, PORT } from './config'
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const RecipeList = (props, navigation) => {
+const RecipeStage = ({props}) => {
+        
+    const [checked1, setChecked1] = useState('');
+    const [button, setButton] = useState(true);
+    const [button1, setButton1] = useState(true);
+    const [getDryRecipe, setGetDryRecipe] = useState('');
+    const [stageNum, setStageNum] = useState(1);
+    const [stageModify, setStageModify] = useState(0);
+    const [dryNumber, setDryNumber] = useState(0);
+
+    console.log(stageNum,"stageNum")
+    
+    const fetchDryRecipe = async (param) => {
+        const dryRecipeResponse = await axios.get(`http://${FRONT_URL}${PORT}/getDryRecipe?param=${param}`);
+        setGetDryRecipe(dryRecipeResponse.data);
+        setStageNum(dryRecipeResponse.data[2]);
+        setDryNumber(dryRecipeResponse.data[1])
+    };
+    useEffect(() => {
+        fetchDryRecipe(props);
+    }, [props,dryNumber]);
+
+    const fetchStageModify = async () => {
+        try{
+            const stageResponse = await axios.get(`http://${FRONT_URL}${PORT}/stageModify?stageValue=${stageNum}&dryNum=${dryNumber}`);
+            setStageModify(stageResponse.data[1])
+        } catch (error) {
+            console.log(error)
+        }
+    };
+    
+    useEffect(() => {
+        fetchStageModify();
+        }, [stageNum,dryNumber]);
+
+    const timeConversion =(seconds) => {
+        var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
+        var min = parseInt((seconds%3600)/60) < 10 ? '0'+ parseInt((seconds%3600)/60) : parseInt((seconds%3600)/60);
+        var sec = seconds % 60 < 10 ? '0'+seconds % 60 : seconds % 60;
+
+        return hour+"시 "+min+"분 "+sec+"초";
+    }
+    const maxStage = (stageNum) => {
+        if(stageNum < getDryRecipe[2]){
+            setStageNum(stageNum + 1)
+        }
+    }
+    const minStage = (stageNum) => {
+        if(stageNum > 1){
+            setStageNum(stageNum - 1)
+        }
+    }
+    if (!props || !getDryRecipe) {
+        return null;
+    }
+    return(
+        <View style={style.recipeBack1}>
+            <BouncyCheckbox
+                isChecked={checked1}
+                size={16}
+                fillColor="#763AFF"
+                unfillColor="#E1E3E6"
+                iconStyle={{borderRadius:3, borderWidth:0}}
+                innerIconStyle={{borderWidth:0}}
+                style={style.checkBox1}
+                onPress={() => {setChecked1(!checked1);}}
+            />
+            <View style={{marginRight: width/25.1,width:width/11}}>
+                <Text style={style.recipeText}>{getDryRecipe[0]}</Text>
+            </View>
+            <View style={{marginRight: width/13.7, width:width/10.5}}>
+            
+                <Text style={style.recipeText}>{timeConversion(stageModify)}</Text>
+            </View>
+            <View style={{marginRight: width/20 ,flexDirection:"row"}}>
+                <Text style={style.recipeText}>{stageNum}</Text>
+                <TouchableOpacity activeOpacity={1}
+                    onPressIn={() => setButton1(false)}
+                    onPressOut={() => setButton1(true)} 
+                    onPress={() => maxStage(stageNum)}>
+                    <Image 
+                    style={style.stageBtn}
+                    source={
+                        button1 ?
+                        require("./assets/image/stagecontrolbtnOn.png"):
+                        require("./assets/image/stagecontrolbtnOffdown.png")}
+                    resizeMode="contain"/>
+                </TouchableOpacity>
+                <TouchableOpacity activeOpacity={1}
+                    onPressIn={() => setButton(false)}
+                    onPressOut={() => setButton(true)} 
+                    onPress={() => minStage(stageNum)}>
+                    <Image 
+                    style={style.stageBtn}
+                    source={
+                        !button ?
+                        require("./assets/image/stagecontrolbtnOff.png"):
+                        require("./assets/image/stagecontrolOndown.png")}
+                    resizeMode="contain"/>
+                </TouchableOpacity>
+            </View>     
+        </View>
+    );
+};
+
+const RecipeList = (props) => {
 
     
     const [stage, setStage] = useState(0);
     const [speechBubble, setSpeechBubble] = useState(0);
     const [sendRecipe, setSendRecipe] = useState([]);
     const [recipeList, setRecipeList] = useState([]);
-
-    const RecipeStage = ({props}) => {
-        
-        const [checked1, setChecked1] = useState('');
-        const [button, setButton] = useState(true);
-        const [button1, setButton1] = useState(true);
-        const [getDryRecipe, setGetDryRecipe] = useState('');
-        const [stageNum, setStageNum] = useState(0);
-        const [stageNumBase, setStageNumBase] = useState(0);
-        
-        const fetchDryRecipe = async (param) => {
-            const dryRecipeResponse = await axios.get(`http://${FRONT_URL}${PORT}/getDryRecipe?param=${param}`);
-            setGetDryRecipe(dryRecipeResponse.data);
-        };
-        console.log(getDryRecipe,"모르겠다")
-        useEffect(() => {
-            fetchDryRecipe(props);
-        }, []);
-        const timeConversion =(seconds) => {
-            var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
-            var min = parseInt((seconds%3600)/60) < 10 ? '0'+ parseInt((seconds%3600)/60) : parseInt((seconds%3600)/60);
-            var sec = seconds % 60 < 10 ? '0'+seconds % 60 : seconds % 60;
-
-            return hour+"시 "+min+"분 "+sec+"초";
-        }
-        const maxStage = (stageNum) => {
-            if(stageNum < stageNumBase){
-                setStageNum(stageNum+1)
-            }
-        }
-        const minStage = (stageNum) => {
-            if(stageNum > 1){
-                setStageNum(stageNum-1)
-            }
-        }
-        if (!props) {
-            return null;
-        }
-        return(
-            <View style={style.recipeBack1}>
-                <BouncyCheckbox
-                    isChecked={checked1}
-                    size={16}
-                    fillColor="#763AFF"
-                    unfillColor="#E1E3E6"
-                    iconStyle={{borderRadius:3, borderWidth:0}}
-                    innerIconStyle={{borderWidth:0}}
-                    style={style.checkBox1}
-                    onPress={() => {setChecked1(!checked1);}}
-                />
-                <View style={{marginRight: width/25.1,width:width/11}}>
-                    <Text style={style.recipeText}>{getDryRecipe[0]}</Text>
-                </View>
-                <View style={{marginRight: width/13.7, width:width/10.5}}>
-                    <Text style={style.recipeText}>{timeConversion(getDryRecipe[3])}</Text>
-                </View>
-                <View style={{marginRight: width/20 ,flexDirection:"row"}}>
-                    <Text style={style.recipeText}>{getDryRecipe[2]}</Text>
-                    <TouchableOpacity activeOpacity={1}
-                        onPressIn={() => setButton1(false)}
-                        onPressOut={() => setButton1(true)} 
-                        onPress={() => maxStage(stageNum)}>
-                        <Image 
-                        style={style.stageBtn}
-                        source={
-                            button1 ?
-                            require("./assets/image/stagecontrolbtnOn.png"):
-                            require("./assets/image/stagecontrolbtnOffdown.png")}
-                        resizeMode="contain"/>
-                    </TouchableOpacity>
-                    <TouchableOpacity activeOpacity={1}
-                        onPressIn={() => setButton(false)}
-                        onPressOut={() => setButton(true)} 
-                        onPress={() => minStage(stageNum)}>
-                        <Image 
-                        style={style.stageBtn}
-                        source={
-                            !button ?
-                            require("./assets/image/stagecontrolbtnOff.png"):
-                            require("./assets/image/stagecontrolOndown.png")}
-                        resizeMode="contain"/>
-                    </TouchableOpacity>
-                </View>     
-            </View>
-        );
-    };
     
     return(
         <>
@@ -154,12 +173,12 @@ const RecipeList = (props, navigation) => {
                     레시피의 온도, 습도, 시간을 조정해 보세요
                 </Text>
             </ImageBackground>
-            <TouchableOpacity onPress={() => props.navigation.navigate('RecipeSetting')}>
+            <TouchableOpacity onPress={() => console.log("건조시작")}>
                 <View style={style.comBtn}>
                     <Text style={style.comBtnText}>건조 시작</Text>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => console.log("송풍시작")}>
                 <View style={style.comBtn1}>
                     <Text style={style.comBtnText1}>송풍(탈취)가동</Text>
                 </View>
@@ -178,9 +197,6 @@ const DayBtn = ({ navigation, setDate }) => {
         const dryListResponse = await axios.get(`http://${FRONT_URL}${PORT}/dryList`);
         setDryList(dryListResponse.data);
     };
-    
-    
-    
     useEffect(() => {
         fetchDryList();
     }, []);
@@ -246,7 +262,7 @@ export default function HomeScreen({ navigation }) {
 
     const [thermicRays, setThermicRays] = useState(1);
     const [blowing, setBlowing] = useState(1);
-    const [learning, setLearning] = useState(0);
+    const [learning, setLearning] = useState(1);
     const [actionCondtion, setActionCondition] = useState(0);
         
     return (
@@ -278,7 +294,7 @@ export default function HomeScreen({ navigation }) {
             </View>
             <View style={style.homeSecondBox}>
                 <Time />
-                <DayBtn navigation={navigation} />
+                <DayBtn />
             </View>
         </View>
     </View>
