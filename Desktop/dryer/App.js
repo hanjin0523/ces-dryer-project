@@ -26,7 +26,7 @@ const App = () => {
     <Provider store={store}>
       <NavigationContainer >
         <Drawer.Navigator
-          initialRouteName="Home" 
+          initialRouteName="RecipeSetting" 
           drawerContent={( props ) => <CustomSidebarMenu {...props}/>} 
           screenOptions={{
             drawerType:'permanent',

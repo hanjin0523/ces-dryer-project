@@ -4,21 +4,32 @@ import { Image, Text , ImageBackground, StyleSheet, Dimensions} from "react-nati
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const Operation  = () => {
+const Operation  = ({operationNum}) => {
 
-    const [operation, setOperation] = useState(34);
-
+    const [operation, setOperation] = useState(operationNum);
+    
+    if(operation === null){
+        return(
+            <ImageBackground source={
+                require("./assets/image/operation/operation10.png")} 
+                style={style.waitImg}
+                resizeMode="contain">
+                <Text style={style.imgInnerText}>{"error"}
+                    <Text style={{fontSize:62,}}></Text>
+                </Text>    
+            </ImageBackground>
+        )}
     if(operation <= 10){
-    return(
-        <ImageBackground source={
-            require("./assets/image/operation/operation10.png")} 
-            style={style.waitImg}
-            resizeMode="contain">
-            <Text style={style.imgInnerText}>{operation}
-                <Text style={{fontSize:62,}}>%</Text>
-            </Text>    
-        </ImageBackground>
-    )}
+        return(
+            <ImageBackground source={
+                require("./assets/image/operation/operation10.png")} 
+                style={style.waitImg}
+                resizeMode="contain">
+                <Text style={style.imgInnerText}>{operation}
+                    <Text style={{fontSize:62,}}>%</Text>
+                </Text>    
+            </ImageBackground>
+        )}
     if(operation > 10 && operation < 36){
         return(
             <ImageBackground source={
@@ -64,6 +75,17 @@ const Operation  = () => {
                 </ImageBackground>
             )}
         if(operation >= 80 && operation < 91){
+            return(
+                <ImageBackground source={
+                    require("./assets/image/operation/operation90.png")} 
+                    style={style.waitImg}
+                    resizeMode="contain">
+                    <Text style={style.imgInnerText}>{operation}
+                        <Text style={style.imgMiniText}>%</Text>
+                    </Text>    
+                </ImageBackground>
+            )}
+        if(operation >= 90 && operation <= 99){
             return(
                 <ImageBackground source={
                     require("./assets/image/operation/operation90.png")} 

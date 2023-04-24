@@ -20,7 +20,7 @@ const width = Dimensions.get('window').width;
 const CustomSidebarMenu = (props) => {
     const BASE_PATH ='./assets/image/';
     const proileImage = 'operationbtn.png';
-    const [dryOnOff, setDryOnOff] = useState();
+    const [dryOnOff, setDryOnOff] = useState(1);/////건조기 가동여부임!!!!첫번째 graphite값
 
     return (
     <SafeAreaView style={{ flex: 1 }}>

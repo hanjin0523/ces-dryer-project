@@ -4,77 +4,86 @@ import { Image, Text , ImageBackground, StyleSheet, Dimensions} from "react-nati
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const HumImg = () => {
-
-    const [humidity, setHumidity] = useState(40);
-
-    if(humidity <= 10){
+const HumImg = ({hum_num}) => {
+    
+    if(hum_num === null){
+        return(
+            <ImageBackground source={
+                require("./assets/image/hum/hum10.png")} 
+                style={style.temHumImg}
+                resizeMode="contain">
+                <Text style={style.imgInnerText}>{"error"}
+                    <Text style={{fontSize:20,}}></Text>
+                </Text>    
+                </ImageBackground>
+    )}
+    if(hum_num <= 10){
     return(
         <ImageBackground source={
             require("./assets/image/hum/hum10.png")} 
             style={style.temHumImg}
             resizeMode="contain">
-            <Text style={style.imgInnerText}>{humidity}
+            <Text style={style.imgInnerText}>{hum_num}
                 <Text style={{fontSize:20,}}>%</Text>
             </Text>    
             </ImageBackground>
     )}
-    if(humidity > 10 && humidity< 36){
+    if(hum_num > 10 && hum_num< 36){
         return(
             <ImageBackground source={
                 require("./assets/image/hum/hum35.png")} 
                 style={style.temHumImg}
                 resizeMode="contain">
-                <Text style={style.imgInnerText}>{humidity}
+                <Text style={style.imgInnerText}>{hum_num}
                     <Text style={{fontSize:20,}}>%</Text>
                 </Text>    
                 </ImageBackground>
         )}
-    if(humidity >= 36 && humidity < 51){
+    if(hum_num >= 36 && hum_num < 51){
         return(
             <ImageBackground source={
                 require("./assets/image/hum/hum50.png")} 
                 style={style.temHumImg}
                 resizeMode="contain">
-                <Text style={style.imgInnerText}>{humidity}
+                <Text style={style.imgInnerText}>{hum_num}
                     <Text style={{fontSize:20,}}>%</Text>
                 </Text>    
                 </ImageBackground>
         )}
-        if(humidity >= 51 && humidity < 76){
+        if(hum_num >= 51 && hum_num < 76){
             return(
                 <ImageBackground source={
                     require("./assets/image/hum/hum75.png")} 
                     style={style.temHumImg}
                     resizeMode="contain">
-                    <Text style={style.imgInnerText}>{humidity}
+                    <Text style={style.imgInnerText}>{hum_num}
                         <Text style={{fontSize:20,}}>%</Text>
                     </Text>    
                     </ImageBackground>
             )}
-        if(humidity >= 76 && humidity < 81){
+        if(hum_num >= 76 && hum_num < 81){
             return(
                 <ImageBackground source={
                     require("./assets/image/hum/hum80.png")} 
                     style={style.temHumImg}
                     resizeMode="contain">
-                    <Text style={style.imgInnerText}>{humidity}
+                    <Text style={style.imgInnerText}>{hum_num}
                         <Text style={{fontSize:20,}}>%</Text>
                     </Text>    
                     </ImageBackground>
             )}
-        if(humidity >= 81 && humidity < 91){
+        if(hum_num >= 81 && hum_num < 91){
             return(
                 <ImageBackground source={
                     require("./assets/image/hum/hum90.png")} 
                     style={style.temHumImg}
                     resizeMode="contain">
-                    <Text style={style.imgInnerText}>{humidity}
+                    <Text style={style.imgInnerText}>{hum_num}
                         <Text style={{fontSize:20,}}>%</Text>
                     </Text>    
                     </ImageBackground>
             )}
-            if(humidity > 90){
+            if(hum_num > 90){
                 return(
                     <ImageBackground source={
                         require("./assets/image/hum/humError.png")} 

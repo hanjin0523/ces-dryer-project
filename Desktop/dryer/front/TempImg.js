@@ -4,88 +4,97 @@ import { Image, Text , ImageBackground, StyleSheet, Dimensions} from "react-nati
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const TempImg = () => {
+const TempImg = ({tem_num}) => {
 
-    const [temperature, setTemperature] = useState(32);
-
-    if(temperature <= 20){
+    if(tem_num === null){
+        return(
+            <ImageBackground source={
+                require("./assets/image/temp/temp20.png")} 
+                style={style.temHumImg}
+                resizeMode="contain">
+                <Text style={style.imgInnerText}>{"error"}
+                    <Text style={{fontSize:20,}}></Text>
+                </Text>    
+                </ImageBackground>
+    )}
+    if(tem_num <= 20){
     return(
         <ImageBackground source={
             require("./assets/image/temp/temp20.png")} 
             style={style.temHumImg}
             resizeMode="contain">
-            <Text style={style.imgInnerText}>{temperature}
+            <Text style={style.imgInnerText}>{tem_num}
                 <Text style={{fontSize:20,}}>°C</Text>
             </Text>    
             </ImageBackground>
     )}
-    if(temperature > 20 && temperature < 31){
+    if(tem_num > 20 && tem_num < 31){
         return(
             <ImageBackground source={
                 require("./assets/image/temp/temp30.png")} 
                 style={style.temHumImg}
                 resizeMode="contain">
-                <Text style={style.imgInnerText}>{temperature}
+                <Text style={style.imgInnerText}>{tem_num}
                     <Text style={{fontSize:20,}}>°C</Text>
                 </Text>    
                 </ImageBackground>
         )}
-    if(temperature >= 31 && temperature < 41){
+    if(tem_num >= 31 && tem_num < 41){
         return(
             <ImageBackground source={
                 require("./assets/image/temp/temp40.png")} 
                 style={style.temHumImg}
                 resizeMode="contain">
-                <Text style={style.imgInnerText}>{temperature}
+                <Text style={style.imgInnerText}>{tem_num}
                     <Text style={{fontSize:20,}}>°C</Text>
                 </Text>    
                 </ImageBackground>
         )}
-        if(temperature >= 41 && temperature < 51){
+        if(tem_num >= 41 && tem_num < 51){
             return(
                 <ImageBackground source={
                     require("./assets/image/temp/temp50.png")} 
                     style={style.temHumImg}
                     resizeMode="contain">
-                    <Text style={style.imgInnerText}>{temperature}
+                    <Text style={style.imgInnerText}>{tem_num}
                         <Text style={{fontSize:20,}}>°C</Text>
                     </Text>    
                     </ImageBackground>
             )}
-        if(temperature >= 51 && temperature < 61){
+        if(tem_num >= 51 && tem_num < 61){
             return(
                 <ImageBackground source={
                     require("./assets/image/temp/temp60.png")} 
                     style={style.temHumImg}
                     resizeMode="contain">
-                    <Text style={style.imgInnerText}>{temperature}
+                    <Text style={style.imgInnerText}>{tem_num}
                         <Text style={{fontSize:20,}}>°C</Text>
                     </Text>    
                     </ImageBackground>
             )}
-        if(temperature >= 61 && temperature < 71){
+        if(tem_num >= 61 && tem_num < 71){
             return(
                 <ImageBackground source={
                     require("./assets/image/temp/temp70.png")} 
                     style={style.temHumImg}
                     resizeMode="contain">
-                    <Text style={style.imgInnerText}>{temperature}
+                    <Text style={style.imgInnerText}>{tem_num}
                         <Text style={{fontSize:20,}}>°C</Text>
                     </Text>    
                     </ImageBackground>
             )}
-        if(temperature >= 71 && temperature < 80){
+        if(tem_num >= 71 && tem_num < 80){
             return(
                 <ImageBackground source={
                     require("./assets/image/temp/temp80.png")} 
                     style={style.temHumImg}
                     resizeMode="contain">
-                    <Text style={style.imgInnerText}>{temperature}
+                    <Text style={style.imgInnerText}>{tem_num}
                         <Text style={{fontSize:20,}}>°C</Text>
                     </Text>  
                     </ImageBackground>
             )}
-            if(temperature >= 80){
+            if(tem_num >= 80){
                 return(
                     <ImageBackground source={
                         require("./assets/image/temp/temperror.png")} 

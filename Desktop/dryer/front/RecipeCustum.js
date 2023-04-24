@@ -1,127 +1,257 @@
-import React, { useState } from "react";
-import { Text, View, TouchableOpacity, Dimensions, Image, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, View, TouchableOpacity, Dimensions, Image, StyleSheet, TextInput, Modal, ImageBackground } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from "axios"
+
+import config, { FRONT_URL, PORT, SERVER_IP, SERVER_PORT } from './config'
+import DeleteButton from './popUpModal/DeleteModal'
+import ModalInput from './popUpModal/ModifyModal'
+import AddModal from "./popUpModal/AddModal";
+import DetailRecipeSetting from "./DetailRecipeSetting";
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const RecipeAdd = () => {
-    
-    return(
-        <View></View>
-    )
-}
+const RecipeCustum = () => {
 
-const RecipeBox = ({ name }) => {
-    
-    const [num, setNum] = useState(0)
+    const [dryList, setDryList] = useState([]);
+    const [getDryRecipe, setGetDryRecipe] = useState([]);
+    const [btnActive, setBtnActive] = useState(1);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [addModalVisible, setAddModalVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [inputValue, setInputValue] = useState('');
+    const [addInputValue, setAddInputValue] = useState('');
+    const [startIndex, setStartIndex] = useState(0); // 추가된 상태 변수
+    const [serverNum, setServerNum] = useState('');
+    const [detailRecipeList, setdetailRecipeList] = useState([]);
 
-    const test = () => {
-        setNum()
-    }
-    if (name == null ){
-        return <View>1</View>
-    }
-    return (
-        <TouchableOpacity onPress={() => test()} style={styles.dayBtn}>
-                <Text style={styles.name}>{name}</Text>
+    const handleInputSubmit = async (inputValue) => {
+        try {
+            // 입력값 처리 로직
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/recipeModify?inputValue=${inputValue}&recipeNum=${serverNum}`);
+        
+            if (!response.ok) {
+                throw new Error('서버 오류 발생');
+            }
+            // 서버의 응답 처리 로직
+            const responseData = await response.json();
+            await fetchDryList1();
+            setModalVisible(false);
+            } catch (error) {
+                console.error(error);
+            }
+    };
+
+    const handleAddSubmit = async (addInputValue) => {
+        try {
+            // 입력값 처리 로직
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/recipeAdd?addInputValue=${addInputValue}`);
+        
+            if (!response.ok) {
+                throw new Error('서버 오류 발생');
+            }
+            // 서버의 응답 처리 로직
+            const responseData = await response.json();
+            await fetchDryList1();
+            setAddModalVisible(false);
+            } catch (error) {
+                console.error(error);
+            }
+    };
+
+    const plusNum = () => {
+        if (btnActive < dryList.length) {
+            setBtnActive(btnActive + 1);
+            if (btnActive - startIndex >= MAX_ITEMS) {
+                setStartIndex(startIndex + 1);
+            }
+        }
+    };
+    
+    const minusNum = () => {
+        if (btnActive > 1) {
+            setBtnActive(btnActive - 1);
+            if (btnActive - startIndex <= 1) {
+                setStartIndex(Math.max(0, startIndex - 1));
+            }
+        }
+    };
+
+    const handleDelete = () => {
+        setIsModalVisible(true);
+    };
+    
+    const handleDeleteConfirm = async() => {
+        //삭제 로직 처리
+        try {
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/recipeDelete?recipeNum=${serverNum}`);
+        
+            if (!response.ok) {
+                throw new Error('서버 오류 발생');
+            }
+            // 서버의 응답 처리 로직
+            const responseData = await response.json();
+            setAddModalVisible(false);
+            await fetchDryList1();
+            } catch (error) {
+                console.error(error);
+            }
+        console.log("삭제완료")
+        setIsModalVisible(false);
+    };
+    
+    const handleDeleteCancel = () => {
+        setIsModalVisible(false);
+    };
+
+    const fetchDryList1 = async () => {
+        const dryListResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/dryList1`);
+        setDryList(dryListResponse.data);
+    };
+    useEffect(() => {
+        fetchDryList1();
+    }, []);
+
+let dryListElements = [];
+const MAX_ITEMS = 3;
+if (dryList.length > 0) {
+    dryListElements = dryList.slice(startIndex, startIndex + MAX_ITEMS).map((item, idx) => (
+        <TouchableOpacity
+            key={item[0]}
+            style={btnActive === startIndex + idx +1 ? styles.dayBtn : styles.dayBtnAct}
+            onPress={() => { setBtnActive(startIndex + idx+1); setServerNum(item[0])}}>
+            <Text style={btnActive != startIndex + idx+1 ? styles.BoxText : styles.BoxTextAct}>{item[1]}</Text>
             <View style={styles.buttons}>
                 <TouchableOpacity style={styles.button}
-                    onPress={()=>console.log("펜슬")}>
+                    onPress={() => { setModalVisible(true); setBtnActive(startIndex+idx+1); setServerNum(item[0])}}>
                     <Icon name="pencil" size={17} color="#DDDDDD" />
                 </TouchableOpacity>
-                <TouchableOpacity  style={styles.button}
-                    onPress={()=>console.log("삭제")}>
+                <TouchableOpacity style={styles.button}
+                    onPress={() => { handleDelete(); setBtnActive(startIndex+idx+1); setServerNum(item[0]);}}>
                     <Icon name="trash-o" size={17} color="#DDDDDD" />
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>
+    ));
+} else {
+    dryListElements.push(
+        <TouchableOpacity key={"loading"}
+            style={styles.dayBtn}
+            disabled={true}>
+            <Text style={styles.BoxText}>loading...</Text>
+        </TouchableOpacity>
     );
-};
+}
 
-const RecipeCustum = () => {
-    
-    const test = () => {
-        console.log("레시피")
-    }
-    const tes = () => {
-        console.log("레시피11")
-    }
+if (dryList.length < 100) {
+    dryListElements.push(
+        <TouchableOpacity
+            key="a"
+            style={styles.dayBtnAdd}
+            onPress={() => { setAddModalVisible(true) }}>
+            <Image source={require("./assets/image/addRecipe.png")} style={{height:32, width:32}}/>
+        </TouchableOpacity>
+    );
+}
 
+    const stageDetailHandler = async () => {
+        try {
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/detailRecipeList?selectNum=${serverNum}`);
+            if(!response.ok){
+                throw new Error('서버 오류 발생');
+            }
+            const responseData = await response.json();
+            setdetailRecipeList(responseData)
+            //함수작동후 다음함수~?
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    useEffect(()=>{
+        stageDetailHandler();
+    },[serverNum])
+
+    console.log(typeof(serverNum))
     return(
-        <View style={{flexDirection:"row", marginLeft: width/35.4430,alignItems:"center"}}>
-            <TouchableOpacity 
-                style={{marginRight: width/68.2926}}
-                onPress={()=>{test(); tes();}}>
-                <Image 
-                    source={require('./assets/image/listbtn.png')} 
-                    style={styles.listbtn}
-                    resizeMode="contain"/>
-            </TouchableOpacity>
-            <RecipeBox name={"매운고추건조"}/>
-            <RecipeBox name={"파프리카건조"}/>
-            <RecipeBox name={"청양고추건조"}/>
-            <RecipeBox name={""}/>
-            <TouchableOpacity 
-                style={{marginLeft: -width/300}}
-                onPress={()=> test()}>
-                <Image 
-                    source={require('./assets/image/listbtnR.png')} 
-                    style={styles.listbtn1}
-                    resizeMode="contain"/>
-            </TouchableOpacity>
+        <View>
+            <View style={{flexDirection:"row", marginLeft: width/42.430,alignItems:"center"}}>
+                    <DeleteButton isvisible={isModalVisible} handleDeleteConfirm={handleDeleteConfirm} handleDeleteCancel={handleDeleteCancel} />
+                    <ModalInput
+                        visible={modalVisible}
+                        onSubmit={handleInputSubmit}
+                        onClose={() => setModalVisible(false)}/>
+                    <AddModal
+                        visible={addModalVisible}
+                        onSubmit={handleAddSubmit}
+                        onClose={() => setAddModalVisible(false)}/>
+                <TouchableOpacity 
+                    style={{marginRight: width/68.2926}}
+                    onPress={minusNum}>
+                    <Image 
+                        source={require('./assets/image/listbtn.png')} 
+                        style={styles.listbtn}
+                        resizeMode="contain"/>
+                </TouchableOpacity>
+                        {dryListElements}
+                <TouchableOpacity 
+                    style={{marginLeft: -width/300}}
+                    onPress={plusNum}>
+                    <Image 
+                        source={require('./assets/image/listbtnR.png')} 
+                        style={styles.listbtn1}
+                        resizeMode="contain"/>
+                </TouchableOpacity>
+            </View>
+            {serverNum ? 
+            <DetailRecipeSetting  props={detailRecipeList} num={serverNum}/> : <Text>레시피를 선택해주세요</Text>}
         </View>
     )
 }
 export default RecipeCustum;
+
 const styles = StyleSheet.create({
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        paddingHorizontal: 20,
+        },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    input: {
+        width: '30%',
+        height: '10%',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 10,
+        paddingHorizontal: 30,
+        marginBottom: 20,
+    },
+    submitButton: {
+        backgroundColor: '#2f95dc',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 10,
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontSize: 18,
+    },
     listbtn1: {
         height:height/40.8,
         width: width/70,
+        position: 'absolute',
+        marginLeft: 0,
+        marginTop: -10,
     },
     listbtn: {
         height:height/40.8,
         width: width/70,
-    },
-    dayBtnAct: {
-        backgroundColor:"#753CEF",
-        alignItems: "center",
-        justifyContent:"center",
-        padding : 10,
-        height: height/8.7191,
-        width: width/18.0645,
-        borderWidth: 1,
-        borderColor: "#E5E5E5",
-        borderRadius: 5,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 10,
-        marginRight: width/52.8301
-    },
-    dayBtn: {
-        backgroundColor:"#FFFFFF",
-        alignItems: "center",
-        justifyContent:"center",
-        padding : 10,
-        height: height/8.7191,
-        width: width/17.9645,
-        borderWidth: 1,
-        borderColor: "#E5E5E5",
-        borderRadius: 5,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 10,
-        marginRight: width/52.8301
     },
     container: {
         padding: 10,
@@ -141,11 +271,79 @@ const styles = StyleSheet.create({
     },
     buttons: {
         flexDirection: 'row',
-        marginRight: 14,
+        marginRight: 0,
         marginTop: 20,
     },
     button: {
-        marginLeft: 14,
+        marginLeft: 2,
+        marginTop: 10,
+        width: 30,
+        height: 22,
+        alignItems:'center',
     },
-    
-})
+    dayBtnAct: {
+        backgroundColor:"#FFFFFF",
+        alignItems: "center",
+        justifyContent:"center",
+        padding : 0,
+        height: height/8.7191,
+        width: width/17.9645,
+        borderWidth: 1,
+        borderColor: "#E5E5E5",
+        borderRadius: 5,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 10,
+        marginRight: width/52.8301
+    },
+    dayBtnAdd: {
+        backgroundColor:"#E9DCFC3A",
+        alignItems: "center",
+        justifyContent:"center",
+        padding : 0,
+        height: height/8.7191,
+        width: width/17.9645,
+        borderWidth: 1,
+        borderColor: "#B5B3B9",
+        borderRadius: 5,
+        borderStyle: 'dashed',
+        marginRight: width/52.8301,
+        // position: 'absolute'
+    },
+    dayBtn: {
+        backgroundColor:"#753CEF",
+        alignItems: "center",
+        justifyContent:"center",
+        padding : 0,
+        height: height/8.7191,
+        width: width/18.0645,
+        borderWidth: 1,
+        borderColor: "#E5E5E5",
+        borderRadius: 5,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 10,
+        marginRight: width/52.8301,
+        textAlign: 'center'
+    },
+    BoxText : {
+        fontSize: 14.1,
+        fontWeight: "bold",
+        color: "#D0D0D4",
+    },
+    BoxTextAct : {
+        fontSize: 14.1,
+        fontWeight: "bold",
+        color: "#FFFFFF",
+    },
+}); 

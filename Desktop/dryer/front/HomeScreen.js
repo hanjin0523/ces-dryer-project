@@ -21,43 +21,55 @@ import axios from "axios"
 import { format } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
+import Spinner from 'react-native-loading-spinner-overlay';
+import BackgroundTimer from 'react-native-background-timer';
+import { NativeEventEmitter, NativeModules } from 'react-native';
+import { LogBox } from 'react-native'; LogBox.ignoreLogs(['new NativeEventEmitter']);
+
+
 
 import TempImg from './TempImg';
 import RecipeSetting from './RecipeSetting';
 import HumImg from './HumImg';
 import Operation from './Operation'
 import Time from './Time';
-import config, { FRONT_URL, PORT } from './config'
+import CountdownTimer from './CountdownTimer';
+import config, { FRONT_URL, PORT, SERVER_IP, SERVER_PORT } from './config'
+import { sendBroadcast } from 'android';
+
 
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const RecipeStage = ({props}) => {
-        
-    const [checked1, setChecked1] = useState('');
-    const [button, setButton] = useState(true);
-    const [button1, setButton1] = useState(true);
+const RecipeList = (props) => {
+    const [checked1, setChecked1] = useState(false);
+    const [button, setButton] = useState(props);
     const [getDryRecipe, setGetDryRecipe] = useState('');
     const [stageNum, setStageNum] = useState(1);
     const [stageModify, setStageModify] = useState(0);
     const [dryNumber, setDryNumber] = useState(0);
-
-    console.log(stageNum,"stageNum")
+    const [blowActive ,setBlowActive] = useState(true);
+    const [operatingActive ,setOperatingActive] = useState(true);
+    const [settingTime, setSettingTime] = useState(0);
     
-    const fetchDryRecipe = async (param) => {
-        const dryRecipeResponse = await axios.get(`http://${FRONT_URL}${PORT}/getDryRecipe?param=${param}`);
-        setGetDryRecipe(dryRecipeResponse.data);
-        setStageNum(dryRecipeResponse.data[2]);
-        setDryNumber(dryRecipeResponse.data[1])
+
+    console.log(props.num,"props")
+
+    const fetchDryRecipe = async () => {
+        const dryRecipeResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/getDryRecipe?param=${props.num}`);
+            setGetDryRecipe(dryRecipeResponse.data);
+            setStageNum(dryRecipeResponse.data[2]);
+            setDryNumber(dryRecipeResponse.data[1])
     };
+
     useEffect(() => {
         fetchDryRecipe(props);
     }, [props,dryNumber]);
 
     const fetchStageModify = async () => {
         try{
-            const stageResponse = await axios.get(`http://${FRONT_URL}${PORT}/stageModify?stageValue=${stageNum}&dryNum=${dryNumber}`);
+            const stageResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/stageModify?stageValue=${stageNum}&dryNum=${dryNumber}`);
             setStageModify(stageResponse.data[1])
         } catch (error) {
             console.log(error)
@@ -66,7 +78,46 @@ const RecipeStage = ({props}) => {
     
     useEffect(() => {
         fetchStageModify();
-        }, [stageNum,dryNumber]);
+    }, [stageNum,dryNumber]);
+
+    const storeData = async (isChecked, time) => {
+        if (isChecked) {
+            const setting_data = { name: getDryRecipe[0], time: time, stage: stageNum };
+            try {
+                await AsyncStorage.setItem('setingValue', JSON.stringify(setting_data));
+                console.log('Successfully stored data:', setting_data);
+            } catch (error) {
+            console.log('Error storing data:', error);
+            }
+        } else {
+            try {
+                await AsyncStorage.removeItem('setingValue');
+                console.log('Successfully removed data');
+            } catch (error) {
+                console.log('Error removing data:', error);
+            }
+        }
+    }
+    
+    useEffect(() => {
+        storeData(checked1, stageModify);
+    }, [checked1, stageModify]);
+    
+
+    const getData = async () => {
+        try {
+            const value = await AsyncStorage.getItem('setingValue');
+            if (value !== null) {
+                const data = JSON.parse(value);
+                setSettingTime(data['time'])
+            }
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    useEffect(() => {
+        getData()
+    },[checked1])
 
     const timeConversion =(seconds) => {
         var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
@@ -75,79 +126,10 @@ const RecipeStage = ({props}) => {
 
         return hour+"시 "+min+"분 "+sec+"초";
     }
-    const maxStage = (stageNum) => {
-        if(stageNum < getDryRecipe[2]){
-            setStageNum(stageNum + 1)
-        }
-    }
-    const minStage = (stageNum) => {
-        if(stageNum > 1){
-            setStageNum(stageNum - 1)
-        }
-    }
-    if (!props || !getDryRecipe) {
-        return null;
-    }
-    return(
-        <View style={style.recipeBack1}>
-            <BouncyCheckbox
-                isChecked={checked1}
-                size={16}
-                fillColor="#763AFF"
-                unfillColor="#E1E3E6"
-                iconStyle={{borderRadius:3, borderWidth:0}}
-                innerIconStyle={{borderWidth:0}}
-                style={style.checkBox1}
-                onPress={() => {setChecked1(!checked1);}}
-            />
-            <View style={{marginRight: width/25.1,width:width/11}}>
-                <Text style={style.recipeText}>{getDryRecipe[0]}</Text>
-            </View>
-            <View style={{marginRight: width/13.7, width:width/10.5}}>
-            
-                <Text style={style.recipeText}>{timeConversion(stageModify)}</Text>
-            </View>
-            <View style={{marginRight: width/20 ,flexDirection:"row"}}>
-                <Text style={style.recipeText}>{stageNum}</Text>
-                <TouchableOpacity activeOpacity={1}
-                    onPressIn={() => setButton1(false)}
-                    onPressOut={() => setButton1(true)} 
-                    onPress={() => maxStage(stageNum)}>
-                    <Image 
-                    style={style.stageBtn}
-                    source={
-                        button1 ?
-                        require("./assets/image/stagecontrolbtnOn.png"):
-                        require("./assets/image/stagecontrolbtnOffdown.png")}
-                    resizeMode="contain"/>
-                </TouchableOpacity>
-                <TouchableOpacity activeOpacity={1}
-                    onPressIn={() => setButton(false)}
-                    onPressOut={() => setButton(true)} 
-                    onPress={() => minStage(stageNum)}>
-                    <Image 
-                    style={style.stageBtn}
-                    source={
-                        !button ?
-                        require("./assets/image/stagecontrolbtnOff.png"):
-                        require("./assets/image/stagecontrolOndown.png")}
-                    resizeMode="contain"/>
-                </TouchableOpacity>
-            </View>     
-        </View>
-    );
-};
 
-const RecipeList = (props) => {
-
-    
-    const [stage, setStage] = useState(0);
-    const [speechBubble, setSpeechBubble] = useState(0);
-    const [sendRecipe, setSendRecipe] = useState([]);
-    const [recipeList, setRecipeList] = useState([]);
-    
     return(
         <>
+        <CountdownTimer time={settingTime} active={operatingActive} checked={checked1}/>
         <View style={style.recipeBack}>
             <Text style={style.select}>레시피 이름</Text>
             <Text style={style.select}>총 건조시간</Text>
@@ -160,27 +142,44 @@ const RecipeList = (props) => {
                 scrollIndicatorStyle={{ backgroundColor: "#753CEF", height:height/9}}
                 scrollIndicatorContainerStyle={{ backgroundColor: "#EFEDF1"}}
                 >
-                <RecipeStage props={props.props}/>
+                <View style={style.recipeBack1}>
+                    <BouncyCheckbox
+                        isChecked={checked1}
+                        size={16}
+                        fillColor="#763AFF" 
+                        unfillColor="#E1E3E6"
+                        iconStyle={{borderRadius:3, borderWidth:0}}
+                        innerIconStyle={{borderWidth:0}}
+                        style={style.checkBox1}
+                        onPress={() => {setChecked1(!checked1);}}
+                    />
+                    <View style={{marginRight: width/25.1,width:width/11}}>
+                        <Text style={style.recipeText1}>{getDryRecipe ? getDryRecipe[0] : "loading..."}</Text>
+                    </View>
+                    <View style={{marginRight: width/13.7, width:width/10.5}}>
+                        <Text style={style.recipeText2}>{timeConversion(stageModify)}</Text>
+                    </View>
+                    <View style={{marginRight: width/20 ,flexDirection:"row"}}>
+                        <Text style={style.recipeText3}>{stageNum}</Text>
+                    </View>     
+                </View> 
             </ScrollViewIndicator>
         </View>
         <View style={style.comBtnBox}>
-            <ImageBackground 
-                source={require('./assets/image/talkbuble.png')}
-                resizeMode="cover"
-                style={speechBubble ? style.talkbubble : style.talkbubbleNone}
-                >
-                <Text style={speechBubble ? style.talkText : null}>
-                    레시피의 온도, 습도, 시간을 조정해 보세요
-                </Text>
-            </ImageBackground>
-            <TouchableOpacity onPress={() => console.log("건조시작")}>
+            <TouchableOpacity disabled={!checked1} onPress={() => {setOperatingActive(!operatingActive);}}>
                 <View style={style.comBtn}>
-                    <Text style={style.comBtnText}>건조 시작</Text>
+                    {operatingActive ?
+                    <Text style={style.comBtnText}>건조 시작</Text> : 
+                    <Image style={style.operatingStop} source={require("./assets/image/operatingStop.png")} />
+                    }
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => console.log("송풍시작")}>
+            <TouchableOpacity onPress={() => {setBlowActive(!blowActive)}}>
                 <View style={style.comBtn1}>
-                    <Text style={style.comBtnText1}>송풍(탈취)가동</Text>
+                    {blowActive ?
+                        <Text style={style.comBtnText1}>송풍(탈취)가동</Text> :
+                        <Text style={style.comBtnText1}>송풍(탈취)중지</Text>
+                    }
                 </View>
             </TouchableOpacity>
         </View>
@@ -188,34 +187,69 @@ const RecipeList = (props) => {
     );
 };
 
-const DayBtn = ({ navigation, setDate }) => {
+const DayBtn = () => {
     const [dryList, setDryList] = useState([]);
-    const [btnActive, setBtnActive] = useState(1);
+    const [btnActive, setBtnActive] = useState(0);
     const [getDryRecipe, setGetDryRecipe] = useState([]);
+    const [startIndex, setStartIndex] = useState(0); // 추가된 상태 변수
+    const [serverNum, setServerNum] =useState('');
 
-    const fetchDryList = async () => {
-        const dryListResponse = await axios.get(`http://${FRONT_URL}${PORT}/dryList`);
-        setDryList(dryListResponse.data);
-    };
-    useEffect(() => {
-        fetchDryList();
-    }, []);
+const fetchDryList = async () => {
+    const dryListResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/dryList`);
+    setDryList(dryListResponse.data);
+};
 
-    const dryListElements = dryList.map((item, idx) => (
-        <TouchableOpacity
-            key={idx}
-            style={btnActive == idx+1 ? style.dayBtn : style.dayBtnAct}
-            onPress={() => {setBtnActive(idx+1);}}>
-            <Text style={btnActive != idx+1 ? style.BoxText : style.BoxTextAct}>{item[1]}</Text>
-        </TouchableOpacity>
-    ));
+useEffect(() => {
+    fetchDryList();
+}, []);
+
+const plusNum = () => {
+    if (btnActive < dryList.length) {
+        setBtnActive(btnActive + 1);
+        if (btnActive - startIndex >= MAX_ITEMS) {
+            setStartIndex(startIndex + 1);
+        }
+    }
+};
+
+const minusNum = () => {
+    if (btnActive > 1) {
+        setBtnActive(btnActive - 1);
+        if (btnActive - startIndex <= 1) {
+            setStartIndex(Math.max(0, startIndex - 1));
+        }
+    }
+};
+const MAX_ITEMS = 5;
+ // 최대 보여줄 아이템 개수
+const dryListElements =
+    dryList.length > 0
+        ? dryList
+            .slice(startIndex, startIndex + MAX_ITEMS).map((item, idx) => (
+                <TouchableOpacity
+                    key={item[0]}
+                    style={btnActive === startIndex + idx + 1 ? style.dayBtn : style.dayBtnAct}
+                    onPress={() => {
+                        {setBtnActive(startIndex + idx + 1); setServerNum(item[0]);}
+                    }}>
+                    <Text style={btnActive != startIndex + idx + 1 ? style.BoxText : style.BoxTextAct}>
+                        {item[1]}
+                    </Text>
+                </TouchableOpacity>
+            ))
+    : (
+                <TouchableOpacity style={style.dayBtn} disabled={true}>
+                    <Text style={style.BoxText}>loading...</Text>
+                </TouchableOpacity>
+        );
+
 
     return (
         <>
             <View style={{ flexDirection: "row", marginLeft: width / 35.4430, alignItems: "center" }}>
                 <TouchableOpacity
                     style={{ marginRight: width / 68.2926 }}
-                    onPress={() => setDate(1)}>
+                    onPress={minusNum}>
                     <Image
                         source={require('./assets/image/listbtn.png')}
                         style={style.listbtn}
@@ -223,14 +257,14 @@ const DayBtn = ({ navigation, setDate }) => {
                 </TouchableOpacity>
                 <View style={style.dryListBtn}>{dryListElements}</View>
                 <TouchableOpacity style={{ marginLeft: width / 2.52, position: 'absolute' }}
-                    onPress={() => setDate(1)}>
+                    onPress={plusNum}>
                     <Image
                         source={require('./assets/image/listbtnR.png')}
                         style={style.listbtn1}
                         resizeMode="contain" />
                 </TouchableOpacity>
             </View>
-            <RecipeList style={style.recipeListMain} navigation={navigation} props={btnActive}/>
+            <RecipeList style={style.recipeListMain} props={btnActive} num={serverNum}/>
         </>
     );
 };
@@ -258,40 +292,78 @@ const SubText = props => {
     );
 };
 
+const FirstBox = () => {
+    const [thermicRays, setThermicRays] = useState(1);
+    const [blowing, setBlowing] = useState(0);
+    const [learning, setLearning] = useState(1);
+    const [actionCondtion, setActionCondition] = useState(0); 
+
+    const [value, setValue] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 3000);
+    }, []);
+
+    useEffect(() => {
+        const fetch_dryer_situation = async () => {
+        try {
+            const dryer_situation = await axios.get(
+            `http://${SERVER_IP}:${SERVER_PORT}/dryer_situation_ws`
+            );
+            setValue(dryer_situation.data);
+        } catch (error) {
+            console.error("graphiteDB연결확인");
+        }
+        };
+        fetch_dryer_situation();
+        const intervalId = setInterval(() => {
+        fetch_dryer_situation();
+        }, 5000);
+
+        return () => {
+        clearInterval(intervalId);
+        };
+    }, []);
+
+
+    return (
+        <View style={style.homeFirstBox}>
+            <View style={{ flexDirection: "row", marginTop: height / 15.6811, marginBottom: height / 30.7368 }}>
+                <Text style={style.BoxTitle}>
+                    Recipe Progress
+                </Text>
+                <Text style={style.BoxTitleMini}>
+                    현재 건조기 상태
+                </Text>
+            </View>
+            <View style={style.OnOffBox}> 
+                <ImageAll text="열선" control={value ? value[1]['value'] : null} />
+                <ImageAll text="송풍" control={value ? value[2]['value'] : null} />
+                <ImageAll text="배습" control={value ? value[3]['value'] : null} />
+            </View>
+            <Operation operationNum={null}/>
+            <View style={{ flexDirection: "row", alignItems: "center", width: width / 4.7, marginTop: height / 21.3380 }}>
+                <SubText main="Temperature" sub="온도" />
+                <SubText main="Humidity" sub="습도" />
+            </View>
+            <View style={{ flexDirection: "row", width: width / 4.7 }}>
+                <TempImg tem_num={value ? value[4]['value'] : null}/>
+                <HumImg hum_num={value ? value[5]['value'] : null}/>
+            </View>
+        </View>
+        );
+    };
+
 export default function HomeScreen({ navigation }) {
 
-    const [thermicRays, setThermicRays] = useState(1);
-    const [blowing, setBlowing] = useState(1);
-    const [learning, setLearning] = useState(1);
-    const [actionCondtion, setActionCondition] = useState(0);
-        
+
     return (
     <View style={style.homeMainBox}>
         <View style={style.homeInnerBox}>
-            <View style={style.homeFirstBox}>
-                <View style={{flexDirection:"row",marginTop: height/15.6811,marginBottom: height/30.7368}}>
-                    <Text style={style.BoxTitle}>
-                        Recipe Progress
-                    </Text>
-                    <Text style={style.BoxTitleMini}>
-                        현재 건조기 상태
-                    </Text>
-                </View>
-                <View style={style.OnOffBox}>
-                    <ImageAll text="열선" control={thermicRays}/>
-                    <ImageAll text="송풍" control={blowing}/>
-                    <ImageAll text="배습" control={learning}/>
-                </View>
-                <Operation />
-                <View style={{flexDirection:"row", alignItems:"center", width:width/4.7, marginTop: height/21.3380}}>
-                    <SubText main="Temperature" sub="온도"/>
-                    <SubText main="Humidity" sub="습도"/>
-                </View>
-                <View style={{flexDirection:"row", width: width/4.7}}>
-                    <TempImg />
-                    <HumImg />
-                </View>
-            </View>
+            <FirstBox />
             <View style={style.homeSecondBox}>
                 <Time />
                 <DayBtn />
@@ -300,6 +372,7 @@ export default function HomeScreen({ navigation }) {
     </View>
     );
 }
+
 const style = StyleSheet.create({
     recipeListMain: {
         flex : 1,
@@ -363,18 +436,36 @@ const style = StyleSheet.create({
         alignItems: "center",
         marginTop: height/22.4358,
     },
+    operatingStop: {
+        width: width/3.5343,
+        height: height/15.5,
+    },
     stageBtn: {
         marginRight: width/130,
         marginTop: height/56.0571,
         width: width/90,
         height: height/50,
     },
-    recipeText: {
+    recipeText1: {
         fontSize: 15, 
         color: "#A3A2A8",
         lineHeight: 41,
         marginRight: width/250,
         marginLeft:  -9
+    },
+    recipeText2: {
+        fontSize: 15, 
+        color: "#A3A2A8",
+        lineHeight: 41,
+        marginRight: width/250,
+        marginLeft:  12
+    },
+    recipeText3: {
+        fontSize: 15, 
+        color: "#A3A2A8",
+        lineHeight: 41,
+        marginRight: width/250,
+        marginLeft:  34
     },
     recipeBack1: {
         width: width/2.38,
@@ -401,7 +492,7 @@ const style = StyleSheet.create({
         marginRight: width/13.8927
     },
     checkBox1: {
-        marginLeft: width/31.0679,
+        marginLeft: width/65,
         marginRight: 0
     },
     recipeBack: {
