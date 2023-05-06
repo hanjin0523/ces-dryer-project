@@ -42,15 +42,15 @@ console.log(typeof(currentTime))
     }, [currentTime]);
 
     const formattedTime = formatTime(currentTime);
-    const aa = currentTime / props.time * 100
+    const aa = props.time / currentTime * 100-100
     const oper = aa.toFixed(2)
     console.log(aa.toFixed(2))
     if(props.time != 0){
     return (
-        <> 
+        <View> 
             <Text style={style.text}>{formattedTime}</Text>
             <Text style={style.text}>{oper}</Text>
-        </>
+        </View>
 
     )};
 };
@@ -60,7 +60,7 @@ export default CountdownTimer;
 const style = StyleSheet.create({
     text: {
         color: 'black',
-        fontSize: 28,
+        fontSize: 12,
         fontWeight: 'bold',
     },
 });

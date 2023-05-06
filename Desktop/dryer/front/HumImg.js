@@ -12,7 +12,7 @@ const HumImg = ({hum_num}) => {
                 require("./assets/image/hum/hum10.png")} 
                 style={style.temHumImg}
                 resizeMode="contain">
-                <Text style={style.imgInnerText}>{"error"}
+                <Text style={{fontSize:15, fontWeight:"bold", color:"black"}}>{"loading.."}
                     <Text style={{fontSize:20,}}></Text>
                 </Text>    
                 </ImageBackground>

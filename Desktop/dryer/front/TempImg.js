@@ -12,8 +12,8 @@ const TempImg = ({tem_num}) => {
                 require("./assets/image/temp/temp20.png")} 
                 style={style.temHumImg}
                 resizeMode="contain">
-                <Text style={style.imgInnerText}>{"error"}
-                    <Text style={{fontSize:20,}}></Text>
+                <Text style={{fontSize:15, fontWeight:"bold", color:"black"}}>{"loading.."}
+                    <Text style={{fontSize:10}}></Text>
                 </Text>    
                 </ImageBackground>
     )}

@@ -62,16 +62,18 @@ def stageModify(stage_num:int, dry_number:str):
 
 def recipeModify(inputValue : str, recipeNum : str):
     ##레시피 변경
+    now = datetime.datetime.now()
+    now_str = now.strftime('%Y-%m-%d %H:%M:%S')
     with connect_db() as conn:
         with conn.cursor() as cur:
             sql ='''UPDATE 
                     drying_table 
                     SET
                     dried_product_name = %s ,
-                    modification_date = DATE(NOW())
+                    modification_date = %s
                     WHERE dry_number = %s;
                     '''
-            cur.execute(sql, (inputValue ,recipeNum))
+            cur.execute(sql, (inputValue, now_str ,recipeNum))
             conn.commit()
             print(cur.rowcount)
     return 
@@ -121,13 +123,16 @@ def getDetailRecipeList(selectNum : str):
                     SELECT 
                         rt.recipe_number , 
                         rt.dry_number ,
-                        rt.stage_number ,
+                        rt.numbering,
+                        dt.dried_product_name,
                         rt.set_temperature ,
                         rt.set_humidity ,
                         rt.uptime 
                     FROM 
                         recipe_table rt 
-                    WHERE rt.dry_number = %s;
+                        INNER JOIN drying_table dt 
+                        on rt.dry_number = dt.dry_number 
+                    WHERE rt.dry_number =%s;
                     '''
             cur.execute(sql, (selectNum,))
             detailRecipeStage_list = cur.fetchall()
@@ -155,3 +160,32 @@ def stageAdd(addInputValue : str):
             detailRecipeList = list(detailRecipeStage_list)
             print(detailRecipeList)
     return detailRecipeList
+
+def stageAdd(inputValue : str):#####미완임... 작업예정
+    ##스테이지 추가
+    with connect_db() as conn:
+        with conn.cursor() as cur:
+            sql ='''INSERT 
+                    INTO 
+                    drying_table (dried_product_name, registration_date, modification_date)
+                    VALUES 
+                    (%s, DATE(NOW()), DATE(NOW()));
+                    '''
+            cur.execute(sql, (inputValue,))
+            conn.DatabaseError
+            conn.commit()
+    return 
+
+def stageDelete(stageNum : str):
+    ##레시피 변경
+    with connect_db() as conn:
+        with conn.cursor() as cur:
+            sql ='''DELETE 
+                    FROM 
+                        recipe_table 
+                    WHERE 
+                        recipe_number = %s;
+                    '''
+            cur.execute(sql, (stageNum,))
+            conn.commit()
+    return 

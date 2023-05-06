@@ -23,7 +23,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import BackgroundTimer from 'react-native-background-timer';
-import { NativeEventEmitter, NativeModules } from 'react-native';
 import { LogBox } from 'react-native'; LogBox.ignoreLogs(['new NativeEventEmitter']);
 
 
@@ -39,98 +38,138 @@ import { sendBroadcast } from 'android';
 
 
 
+
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
 const RecipeList = (props) => {
+    
     const [checked1, setChecked1] = useState(false);
-    const [button, setButton] = useState(props);
-    const [getDryRecipe, setGetDryRecipe] = useState('');
-    const [stageNum, setStageNum] = useState(1);
+    const [getDryRecipe, setGetDryRecipe] = useState(1);
+    const [stageNum, setStageNum] = useState(0);
+    const [stageName, setStageName] = useState('');
     const [stageModify, setStageModify] = useState(0);
     const [dryNumber, setDryNumber] = useState(0);
     const [blowActive ,setBlowActive] = useState(true);
     const [operatingActive ,setOperatingActive] = useState(true);
     const [settingTime, setSettingTime] = useState(0);
-    
-
-    console.log(props.num,"props")
-
-    const fetchDryRecipe = async () => {
-        const dryRecipeResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/getDryRecipe?param=${props.num}`);
-            setGetDryRecipe(dryRecipeResponse.data);
-            setStageNum(dryRecipeResponse.data[2]);
-            setDryNumber(dryRecipeResponse.data[1])
-    };
-
-    useEffect(() => {
-        fetchDryRecipe(props);
-    }, [props,dryNumber]);
-
-    const fetchStageModify = async () => {
-        try{
-            const stageResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/stageModify?stageValue=${stageNum}&dryNum=${dryNumber}`);
-            setStageModify(stageResponse.data[1])
+    const [operSettingTime, setOperSettingTime] = useState(0);
+    const [detailRecipeList, setdetailRecipeList] = useState(0);
+    const [activeNum, setActiveNum] = useState(0);
+    console.log(props.num, "프롭스네임")
+    const stageDetailHandler = async () => {
+        ////스테이지 불러오기/////
+        try {
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/detailRecipeList?selectNum=${props.num}`);
+            if(!response.ok){
+                throw new Error('서버 오류 발생');
+            }
+            const responseData = await response.json();
+            let sumTime = 0;
+            let stage = 0;
+            let stageName = '';
+            for(let i = 0; i < responseData.length; i++){
+                sumTime += responseData[i][6];
+                stage += responseData[i][2]
+                stageName = responseData[i][3]
+            }
+            setdetailRecipeList(responseData)
+            setStageName(stageName)
+            setSettingTime(sumTime)
+            setStageNum(stage)
+            setActiveNum(props.num)
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     };
+    useEffect(()=>{
+        stageDetailHandler();
+    },[props.props])
     
-    useEffect(() => {
-        fetchStageModify();
-    }, [stageNum,dryNumber]);
-
-    const storeData = async (isChecked, time) => {
-        if (isChecked) {
-            const setting_data = { name: getDryRecipe[0], time: time, stage: stageNum };
-            try {
-                await AsyncStorage.setItem('setingValue', JSON.stringify(setting_data));
-                console.log('Successfully stored data:', setting_data);
+    const storeData = async () => {
+        try {
+            await AsyncStorage.setItem('setingValue', JSON.stringify(detailRecipeList));
+            console.log('Successfully stored data:', detailRecipeList);
             } catch (error) {
             console.log('Error storing data:', error);
             }
-        } else {
+        };
+        
+        const removeData = async () => {
             try {
-                await AsyncStorage.removeItem('setingValue');
-                console.log('Successfully removed data');
+            await AsyncStorage.removeItem('setingValue');
+            console.log('Successfully removed data');
             } catch (error) {
-                console.log('Error removing data:', error);
+            console.log('Error removing data:', error);
             }
-        }
-    }
-    
-    useEffect(() => {
-        storeData(checked1, stageModify);
-    }, [checked1, stageModify]);
-    
+        };
+        
+        useEffect(() => {
+            storeData();
+            return removeData; // 컴포넌트가 unmount될 때 호출됩니다.
+        }, [stageName]);
 
     const getData = async () => {
         try {
-            const value = await AsyncStorage.getItem('setingValue');
-            if (value !== null) {
+                const value = await AsyncStorage.getItem('setingValue');
                 const data = JSON.parse(value);
-                setSettingTime(data['time'])
-            }
+                setOperSettingTime(data)
             } catch (error) {
                 console.log(error);
             }
         }
     useEffect(() => {
         getData()
-    },[checked1])
+    },[operatingActive===true])
+console.log(operSettingTime,"오퍼레이팅셋팅타임")
 
     const timeConversion =(seconds) => {
-        var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
-        var min = parseInt((seconds%3600)/60) < 10 ? '0'+ parseInt((seconds%3600)/60) : parseInt((seconds%3600)/60);
-        var sec = seconds % 60 < 10 ? '0'+seconds % 60 : seconds % 60;
-
-        return hour+"시 "+min+"분 "+sec+"초";
+        if(!isNaN(seconds)){
+            var hour = parseInt(seconds/3600) < 10 ? '0'+ parseInt(seconds/3600) : parseInt(seconds/3600);
+            var min = parseInt((seconds%3600)/60) < 10 ? '0'+ parseInt((seconds%3600)/60) : parseInt((seconds%3600)/60);
+            var sec = seconds % 60 < 10 ? '0'+seconds % 60 : seconds % 60;
+            return hour+"시 "+min+"분 "+sec+"초"
+        }else{
+            return " "
+        }
     }
+////테스트구간!!!!/////
+    const testBtn = async() => {
+        try{
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/${operatingActive ? 'test1' : 'test'}`)
+        if (!response.ok) {
+            throw new Error('서버 오류 발생');
+        }
+        const responseData = await response.json();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    useEffect(() => {
+        testBtn()
+    },[operatingActive])
 
+    const testBtn1 = async() => {
+        try{
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/${blowActive ? 'testFan1' : 'testFan'}`)
+            console.log(response.status)
+        if (!response.ok) {
+            throw new Error('서버 오류 발생');
+        }
+        const responseData = await response.json();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    useEffect(() => {
+        testBtn1()
+    },[blowActive])
+////////
     return(
         <>
-        <CountdownTimer time={settingTime} active={operatingActive} checked={checked1}/>
         <View style={style.recipeBack}>
+        {checked1 ? 
+        <CountdownTimer time={settingTime} active={operatingActive} checked={checked1} /> : null}
             <Text style={style.select}>레시피 이름</Text>
             <Text style={style.select}>총 건조시간</Text>
             <Text style={style.select1}>스테이지</Text>
@@ -151,13 +190,16 @@ const RecipeList = (props) => {
                         iconStyle={{borderRadius:3, borderWidth:0}}
                         innerIconStyle={{borderWidth:0}}
                         style={style.checkBox1}
-                        onPress={() => {setChecked1(!checked1);}}
+                        onPress={(checked1) => {
+                            // setChecked1(checked1);
+                            // storeData(checked1);
+                        }}
                     />
                     <View style={{marginRight: width/25.1,width:width/11}}>
-                        <Text style={style.recipeText1}>{getDryRecipe ? getDryRecipe[0] : "loading..."}</Text>
+                        <Text style={style.recipeText1}>{stageName ? stageName : "레시피추가"}</Text>
                     </View>
                     <View style={{marginRight: width/13.7, width:width/10.5}}>
-                        <Text style={style.recipeText2}>{timeConversion(stageModify)}</Text>
+                        <Text style={style.recipeText2}>{timeConversion(settingTime)}</Text>
                     </View>
                     <View style={{marginRight: width/20 ,flexDirection:"row"}}>
                         <Text style={style.recipeText3}>{stageNum}</Text>
@@ -166,7 +208,7 @@ const RecipeList = (props) => {
             </ScrollViewIndicator>
         </View>
         <View style={style.comBtnBox}>
-            <TouchableOpacity disabled={!checked1} onPress={() => {setOperatingActive(!operatingActive);}}>
+            <TouchableOpacity onPress={() => {setOperatingActive(!operatingActive);}}>
                 <View style={style.comBtn}>
                     {operatingActive ?
                     <Text style={style.comBtnText}>건조 시작</Text> : 
@@ -188,20 +230,24 @@ const RecipeList = (props) => {
 };
 
 const DayBtn = () => {
+
     const [dryList, setDryList] = useState([]);
-    const [btnActive, setBtnActive] = useState(0);
+    const [btnActive, setBtnActive] = useState(1);
     const [getDryRecipe, setGetDryRecipe] = useState([]);
     const [startIndex, setStartIndex] = useState(0); // 추가된 상태 변수
     const [serverNum, setServerNum] =useState('');
+    const [recipeName, setRecipeName] =useState('');
 
 const fetchDryList = async () => {
     const dryListResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/dryList`);
-    setDryList(dryListResponse.data);
+        setDryList(dryListResponse.data);
+        setRecipeName(dryListResponse.data[0][1])
+        setServerNum(dryListResponse.data[0][0])
 };
 
 useEffect(() => {
     fetchDryList();
-}, []);
+}, [btnActive]);
 
 const plusNum = () => {
     if (btnActive < dryList.length) {
@@ -246,9 +292,9 @@ const dryListElements =
 
     return (
         <>
-            <View style={{ flexDirection: "row", marginLeft: width / 35.4430, alignItems: "center" }}>
+            <View style={{ flexDirection: "row", marginLeft: width / 51.4430, alignItems: "center"}}>
                 <TouchableOpacity
-                    style={{ marginRight: width / 68.2926 }}
+                    style={{ marginRight: width / 90.2926 , width:30, height:30, alignItems:"center", justifyContent:"center" }}
                     onPress={minusNum}>
                     <Image
                         source={require('./assets/image/listbtn.png')}
@@ -256,7 +302,7 @@ const dryListElements =
                         resizeMode="contain" />
                 </TouchableOpacity>
                 <View style={style.dryListBtn}>{dryListElements}</View>
-                <TouchableOpacity style={{ marginLeft: width / 2.52, position: 'absolute' }}
+                <TouchableOpacity style={{ marginLeft: width / 2.50, position: 'absolute', width:30, height:30, alignItems:"center", justifyContent:"center" }}
                     onPress={plusNum}>
                     <Image
                         source={require('./assets/image/listbtnR.png')}
@@ -312,22 +358,26 @@ const FirstBox = () => {
         try {
             const dryer_situation = await axios.get(
             `http://${SERVER_IP}:${SERVER_PORT}/dryer_situation_ws`
+            // `http://${SERVER_IP}:${SERVER_PORT}/testSenser`
             );
+            console.log(dryer_situation.data)
             setValue(dryer_situation.data);
         } catch (error) {
             console.error("graphiteDB연결확인");
         }
         };
-        fetch_dryer_situation();
-        const intervalId = setInterval(() => {
-        fetch_dryer_situation();
-        }, 5000);
+        const intervalId = setInterval(async() => {
+            await fetch_dryer_situation();
+        }, 15000);
 
         return () => {
-        clearInterval(intervalId);
+            clearInterval(intervalId);
         };
     }, []);
 
+
+    
+    console.log(value)
 
     return (
         <View style={style.homeFirstBox}>
@@ -340,16 +390,18 @@ const FirstBox = () => {
                 </Text>
             </View>
             <View style={style.OnOffBox}> 
-                <ImageAll text="열선" control={value ? value[1]['value'] : null} />
-                <ImageAll text="송풍" control={value ? value[2]['value'] : null} />
-                <ImageAll text="배습" control={value ? value[3]['value'] : null} />
+                <ImageAll text="열선" control={null} />
+                <ImageAll text="송풍" control={null} />
+                <ImageAll text="배습" control={null} />
             </View>
-            <Operation operationNum={null}/>
+            <Operation operationNum={'30'}/>
             <View style={{ flexDirection: "row", alignItems: "center", width: width / 4.7, marginTop: height / 21.3380 }}>
                 <SubText main="Temperature" sub="온도" />
                 <SubText main="Humidity" sub="습도" />
             </View>
             <View style={{ flexDirection: "row", width: width / 4.7 }}>
+                {/* <TempImg tem_num={value ? value[0][0] : null}/>
+                <HumImg hum_num={value ? value[1][1] : null}/> */}
                 <TempImg tem_num={value ? value[4]['value'] : null}/>
                 <HumImg hum_num={value ? value[5]['value'] : null}/>
             </View>
@@ -499,7 +551,7 @@ const style = StyleSheet.create({
         width: width/2.43,
         height: height/16.6382,
         marginLeft: width/42.4430,
-        marginTop: height/15.52,
+        marginTop: height/27.52,
         backgroundColor: "#F5F6FA",
         borderRadius: 5,
         flexDirection: "row",

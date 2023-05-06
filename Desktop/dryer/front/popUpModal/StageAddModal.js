@@ -1,3 +1,4 @@
+import { template } from '@babel/core';
 import React, { useState } from 'react';
 import {
   View,
@@ -10,38 +11,53 @@ import {
 } from 'react-native';
 
 const StageAddModal = ({visible, onSubmit, onClose}) => {
-  const [addInputValue, setAddInputValue] = useState('');
+
+  const [addInputValue, setAddInputValue] = useState([]);
 
   const handleSubmit = () => {
-    onSubmit(addInputValue);
-    setAddInputValue('');
+      onSubmit(addInputValue);
+      setAddInputValue({temperature: '', humidity: '', time: ''});
   };
-
   return (
-    <View>
-        <Modal visible={visible} animationType="fade" transparent>
-            <View style={styles.modalContainer}>
-                <View style={styles.modalInner}>
-                    <Text style={styles.modalTitle}>신규레시피입력</Text>
-                    <TextInput
-                    style={styles.input}
-                    value={addInputValue}
-                    onChangeText={(text) => setAddInputValue(text)}
-                    placeholder="입력하세요"
-                    />
-                    <View style={{flexDirection:'row'}}>
-                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                        <Text style={styles.text1}>입력 완료</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                        <Text style={styles.text1}>닫기</Text>
-                        </TouchableOpacity>
+        <View>
+            <Modal visible={visible} animationType="fade" transparent>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalInner}>
+                        <Text style={styles.modalTitle}>추가스테이지입력</Text>
+                        <Text>온도형식은 숫자두자리</Text>
+                        <TextInput
+                        style={styles.input}
+                        value={addInputValue.temperature}
+                        onChangeText={(text) => setAddInputValue(prev =>({...prev, temperature: text}))}
+                        placeholder="온도를 입력하세요"
+                        />
+                        <Text>습도형식은 숫자두자리</Text>
+                        <TextInput
+                        style={styles.input}
+                        value={addInputValue.humidity}
+                        onChangeText={(text) => setAddInputValue(prev =>({...prev, humidity: text}))}
+                        placeholder="습도를 입력하세요"
+                        />
+                        <Text>시간은 00:00:00형식으로 입력</Text>
+                        <TextInput
+                        style={styles.input}
+                        value={addInputValue.time}
+                        onChangeText={(text) => setAddInputValue(prev =>({...prev, time: text}))}
+                        placeholder="시간을 입력하세요"
+                        />
+                        <View style={{flexDirection:'row'}}>
+                            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                            <Text style={styles.text1}>입력 완료</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                            <Text style={styles.text1}>닫기</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
-            </View>
-        </Modal>
-    </View>
-  )
+            </Modal>
+        </View>
+    )
 }
 
 export default StageAddModal;

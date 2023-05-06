@@ -1,16 +1,20 @@
 from typing import Union
-from fastapi import FastAPI ,Query
+from fastapi import FastAPI , Request
 from fastapi.websockets import WebSocket
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import json
-
-
-import databaseMaria
+import re
+import threading
 import config
 
+from socketSet import socketModule
+from database import databaseMaria
+from operation import operation
+
 app = FastAPI()
+
 
 origins = [
     "http://localhost",
@@ -28,18 +32,42 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+soket = socketModule.SocketControl()
+action = operation.Monitor()
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
+class stageAddData(BaseModel):
+    temperature: str
+    humidity: str
+    time: str
 
+# @app.get("/testSenser")
+# async def testSenser():
+#     data = soket.start_server(['senser1','senser2', 'senser3'])
+#     print(data,"server")
+#     return data
 
-@app.get("/aa")
-def read_root():
-    re = "1"
-    return re
+# @app.get("/testFan1")
+# async def test():
+#     soket.start_server(["fan1_off","fan2_off"])
+#     # soket.start_server(["h1_off"])
+#     return None
 
+# @app.get("/testFan")
+# async def test():
+#     soket.start_server(["fan1_on","fan2_on"])
+#     # soket.start_server(["h1_on"])
+#     return None
+
+@app.get("/test1")
+async def test():
+    soket.start_server(["h1_off","h2_off","h3_off",'fan1_off','fan2_off'])
+    # soket.start_server(["h1_off"])
+    return None
+
+@app.get("/test")
+async def test():
+    action.(39,29,60)
+    return None
 
 @app.get("/dryList")
 def dryList():
@@ -57,16 +85,8 @@ async def getDryRecipe(param : str):
     try:
         dryRecipe = databaseMaria.getDryRecipe(param)
     except:
-        dryRecipe = ["레시피 등록해주세요",0,0,"레시피 등록해주세요"]
+        dryRecipe = ["레시피 등록해주세요",'','',"레시피 등록해주세요"]
     return dryRecipe     
-
-@app.get("/stageModify")
-async def stageModify(stageValue : int , dryNum:str): 
-    try:
-        stageList = databaseMaria.stageModify(stageValue,dryNum)
-    except:
-        stageList = [0,"망고망고"]
-    return stageList   
 
 @app.get("/recipeModify")
 async def recipeModify(inputValue : str, recipeNum : str):
@@ -102,12 +122,23 @@ async def detailRecipeList(selectNum: str):
         return detailRecipeList
     return detailRecipeList
 
-@app.get("/stageAdd")
-async def stageAdd(addInputValue: str):
+@app.post("/stageAdd")
+async def stageAdd(request: Request):
     try:
-        # detailRecipeList = databaseMaria.getDetailRecipeList(selectNum)
-        print(addInputValue,"서버")
-        detailRecipeList = 0
+        data = await request.json()
+        serverNum = data.get('serverNum')
+        addStageValue = data.get('addStageValue')
+        print(data)
+        databaseMaria.stageAdd(serverNum, addStageValue)
+    except: 
+        print("실패")
+    return detailRecipeList
+
+@app.get("/stageDelete")
+async def stageDelete(stageNum: str):
+    print(stageNum,"stageNum")
+    try:
+        detailRecipeList = databaseMaria.stageDelete(stageNum)
     except: 
         detailRecipeList = 0
         return detailRecipeList
@@ -139,3 +170,4 @@ async def dryer_situation():
         mergeData.append({'data':field, 'value':value})
     print(mergeData)
     return mergeData
+

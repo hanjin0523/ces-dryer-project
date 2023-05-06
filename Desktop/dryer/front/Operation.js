@@ -11,10 +11,10 @@ const Operation  = ({operationNum}) => {
     if(operation === null){
         return(
             <ImageBackground source={
-                require("./assets/image/operation/operation10.png")} 
+                require("./assets/image/operation/rest.png")} 
                 style={style.waitImg}
                 resizeMode="contain">
-                <Text style={style.imgInnerText}>{"error"}
+                <Text style={style.imgInnerText}>{""}
                     <Text style={{fontSize:62,}}></Text>
                 </Text>    
             </ImageBackground>

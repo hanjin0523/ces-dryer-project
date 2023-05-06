@@ -66,7 +66,7 @@ const Dial = ({selectNum}) => {
         <Text style={{fontSize:20, color:"black",fontWeight:"500", marginLeft:50}}>20<Text style={{fontSize:14}}>°C</Text></Text>
       </View>
       <View style={{width:500,height:30,position:"absolute",marginTop:90}}>
-        <Text style={{fontSize:20, color:"black",fontWeight:"500",marginLeft:400}}>80<Text style={{fontSize:14}}>°C</Text></Text>
+        <Text style={{fontSize:20, color:"black",fontWeight:"500",marginLeft:400}}>60<Text style={{fontSize:14}}>°C</Text></Text>
       </View>
         <RadialSlider
           style={styles.mainCircle}
@@ -84,8 +84,8 @@ const Dial = ({selectNum}) => {
           unitStyle={{marginLeft:0,fontWeight:"bold",marginTop:35}}
           thumbColor={'#FF7345'}
           thumbRadius={11}
-          thumbBorderWidth={5}
-          sliderWidth={7}
+          thumbBorderWidth={6}
+          sliderWidth={5}
           linearGradient ={[ { offset: '0%', color:'#FFD76F' }, 
                           { offset: '100%', color: '#FF7345' }]}
         />
@@ -138,12 +138,12 @@ const styles = StyleSheet.create({
     marginLeft: 30,
   },
   mainCircle: {
-    marginTop: -29,
+    marginTop: -29.5,
   },
   circle: {
     marginLeft: 32,
     width : width/5.8,
-    height : height/3.54,
+    height : height/3.44,
     backgroundColor: '#FFFFFF',
     position: 'absolute',
     borderRadius: (width/5)/2,

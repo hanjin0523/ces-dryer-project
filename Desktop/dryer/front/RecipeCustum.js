@@ -19,12 +19,13 @@ const RecipeCustum = () => {
     const [btnActive, setBtnActive] = useState(1);
     const [modalVisible, setModalVisible] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [delModalVisible, setDelModalVisible] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [addInputValue, setAddInputValue] = useState('');
     const [startIndex, setStartIndex] = useState(0); // 추가된 상태 변수
     const [serverNum, setServerNum] = useState('');
     const [detailRecipeList, setdetailRecipeList] = useState([]);
+
 
     const handleInputSubmit = async (inputValue) => {
         try {
@@ -79,7 +80,7 @@ const RecipeCustum = () => {
     };
 
     const handleDelete = () => {
-        setIsModalVisible(true);
+        setDelModalVisible(true);
     };
     
     const handleDeleteConfirm = async() => {
@@ -98,16 +99,17 @@ const RecipeCustum = () => {
                 console.error(error);
             }
         console.log("삭제완료")
-        setIsModalVisible(false);
+        setDelModalVisible(false);
     };
     
     const handleDeleteCancel = () => {
-        setIsModalVisible(false);
+        setDelModalVisible(false);
     };
 
     const fetchDryList1 = async () => {
         const dryListResponse = await axios.get(`http://${SERVER_IP}:${SERVER_PORT}/dryList1`);
         setDryList(dryListResponse.data);
+        setServerNum(dryListResponse.data[0][0])
     };
     useEffect(() => {
         fetchDryList1();
@@ -120,7 +122,7 @@ if (dryList.length > 0) {
         <TouchableOpacity
             key={item[0]}
             style={btnActive === startIndex + idx +1 ? styles.dayBtn : styles.dayBtnAct}
-            onPress={() => { setBtnActive(startIndex + idx+1); setServerNum(item[0])}}>
+            onPress={() => { setBtnActive(startIndex + idx+1); setServerNum(item[0]);}}>
             <Text style={btnActive != startIndex + idx+1 ? styles.BoxText : styles.BoxTextAct}>{item[1]}</Text>
             <View style={styles.buttons}>
                 <TouchableOpacity style={styles.button}
@@ -155,28 +157,13 @@ if (dryList.length < 100) {
     );
 }
 
-    const stageDetailHandler = async () => {
-        try {
-            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/detailRecipeList?selectNum=${serverNum}`);
-            if(!response.ok){
-                throw new Error('서버 오류 발생');
-            }
-            const responseData = await response.json();
-            setdetailRecipeList(responseData)
-            //함수작동후 다음함수~?
-        } catch (error) {
-            console.log(error);
-        }
-    };
-    useEffect(()=>{
-        stageDetailHandler();
-    },[serverNum])
-
-    console.log(typeof(serverNum))
     return(
         <View>
-            <View style={{flexDirection:"row", marginLeft: width/42.430,alignItems:"center"}}>
-                    <DeleteButton isvisible={isModalVisible} handleDeleteConfirm={handleDeleteConfirm} handleDeleteCancel={handleDeleteCancel} />
+            <View style={{flexDirection:"row", marginLeft: width/45.430,alignItems:"center"}}>
+                    <DeleteButton 
+                        isvisible={delModalVisible} 
+                        handleDeleteConfirm={handleDeleteConfirm} 
+                        handleDeleteCancel={handleDeleteCancel} />
                     <ModalInput
                         visible={modalVisible}
                         onSubmit={handleInputSubmit}
@@ -186,7 +173,7 @@ if (dryList.length < 100) {
                         onSubmit={handleAddSubmit}
                         onClose={() => setAddModalVisible(false)}/>
                 <TouchableOpacity 
-                    style={{marginRight: width/68.2926}}
+                    style={{marginRight: width/100.2926, width:30, height:30, alignItems:"center", justifyContent:"center"}}
                     onPress={minusNum}>
                     <Image 
                         source={require('./assets/image/listbtn.png')} 
@@ -195,19 +182,19 @@ if (dryList.length < 100) {
                 </TouchableOpacity>
                         {dryListElements}
                 <TouchableOpacity 
-                    style={{marginLeft: -width/300}}
+                    style={{marginLeft: -width/120 , width:30, height:30, alignItems:"center", justifyContent:"center"}}
                     onPress={plusNum}>
                     <Image 
                         source={require('./assets/image/listbtnR.png')} 
                         style={styles.listbtn1}
                         resizeMode="contain"/>
                 </TouchableOpacity>
-            </View>
-            {serverNum ? 
-            <DetailRecipeSetting  props={detailRecipeList} num={serverNum}/> : <Text>레시피를 선택해주세요</Text>}
+            </View> 
+            <DetailRecipeSetting  props={detailRecipeList} num={serverNum} />
         </View>
     )
 }
+
 export default RecipeCustum;
 
 const styles = StyleSheet.create({

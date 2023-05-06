@@ -4,8 +4,7 @@ import ScrollViewIndicator from 'react-native-scroll-indicator';
 
 import config, { FRONT_URL, PORT, SERVER_IP, SERVER_PORT } from './config';
 import StageAddModal from './popUpModal/StageAddModal';
-
-
+import DeleteButton from './popUpModal/DeleteModal';
 
 const DetailRecipeSetting = (props) => {
     const [stage, setState] = useState('');
@@ -13,34 +12,52 @@ const DetailRecipeSetting = (props) => {
     const [humidity, setHumidity] = useState('');
     const [settingTime, setSettingTime] = useState('');
     const [isActive, setIsActive] = useState([]);
+    const [addStageModalVisible, setStageAddModalVisible] = useState(false);
+    const [delModalVisible, setDelModalVisible] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
+    const [deleteStageId,setDeleteStageId ] = useState('');
+    const [detailRecipeList,setdetailRecipeList ] = useState('');
 
-    console.log(isActive,"isActive")
 
-    const handlePress = (idx) => {
-        const newIsActive = [...isActive];
-        newIsActive[idx] = !newIsActive[idx];
-        setIsActive(newIsActive);
-    }
-
-    useEffect(() => {
-        setIsActive([]);
+    const stageDetailHandler = async () => {
+        ////스테이지 불러오기/////
+        try {
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/detailRecipeList?selectNum=${props.num}`);
+            if(!response.ok){
+                throw new Error('서버 오류 발생');
+            }
+            const responseData = await response.json();
+            setdetailRecipeList(responseData)
+            //함수작동후 다음함수~?
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    useEffect(()=>{
+        stageDetailHandler();
     },[props.num])
 
-    const handleAddSubmit = async () => {
+    const handleAddSubmit = async (addInputValue) => {
         try {
-            // 입력값 처리 로직
-            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/stageAdd?addInputValue=${props.num}`);
-        
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/stageAdd`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    serverNum: props.num,
+                    addStageValue : addInputValue
+                })
+            });
+            console.log("서버전송완료")
             if (!response.ok) {
                 throw new Error('서버 오류 발생');
             }
-            // 서버의 응답 처리 로직
             const responseData = await response.json();
-            setAddModalVisible(false);
-            } catch (error) {
-                console.error(error);
-            }
+            setStageAddModalVisible(false);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const timeConversion =(seconds) => {
@@ -51,30 +68,70 @@ const DetailRecipeSetting = (props) => {
         return hour+":"+min+":"+sec;
     }
 
-    const test = props.props.map((item, idx) => (
-        <TouchableOpacity key={idx} style={styles.stageBtn} onPress={()=>handlePress(idx)}>
-            <View style={isActive[idx] ? styles.stageBox : styles.stageBoxDis}>
-                <Image source={isActive[idx] ? require('./assets/image/stageClick.png') : require('./assets/image/stageBtnDisable.png') } style={styles.stageActive}/>
-                <Text style={isActive[idx] ? styles.stageText: styles.stageTextDisabled}>Stage{item[2]}</Text>
-            </View>
-            <View style={styles.leftBox}>
-                <View style={styles.leftInnerBox}>
-                    <View style={styles.tempHumBox}>
-                        <Text style={isActive[idx] ? styles.tempText : styles.tempTextDisabled}>{item[3]}
+    const handleDeleteConfirm = async() => {
+        //삭제 로직 처리
+        try {
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/stageDelete?stageNum=${deleteStageId}`);
+        
+            if (!response.ok) {
+                throw new Error('서버 오류 발생');
+            }
+            // 서버의 응답 처리 로직
+            const responseData = await response.json();
+            // setAddModalVisible(false);
+            } catch (error) {
+                console.error(error);
+            }
+        console.log("삭제완료")
+        setDelModalVisible(false);
+    };
+    const handleDelete = (itemId) => {
+        console.log(itemId)
+        setDeleteStageId(itemId)
+        setDelModalVisible(true);
+    };
+    
+    const handleDeleteCancel = () => {
+        setDelModalVisible(false);
+    };
+    const test = detailRecipeList ? detailRecipeList.map((item, idx) => (
+        <TouchableOpacity  key={idx} style={styles.stageMain} onLongPress={() => {handleDelete(item[0])}}>
+            <View style={styles.stageBtn}>
+                <View style={styles.stageBox}>
+                    <Image source={require('./assets/image/stageClick.png')} style={styles.stageActive}/>
+                    <Text style={styles.stageText}>Stage{item[2]+idx}</Text>
+                </View>
+                <View style={styles.leftBox}>
+                    <View style={styles.leftInnerBox}>
+                        <View style={styles.tempHumBox}>
+                        <Text style={styles.tempText}>{item[4]}
                             <Text style={{fontSize:17}}>°C</Text>
                         </Text>
                         <View style={styles.divider}/>
-                        <Text style={isActive[idx] ? styles.tempText1 : styles.tempText1Disabled}>{item[4]}
+                        <Text style={styles.tempText1}>{item[5]}
                             <Text style={{fontSize:17}}>%</Text>
                         </Text>
                         <View style={styles.stageTime}>
-                            <Image source={require('./assets/image/stageTime.png')} style={isActive[idx] ? styles.stageTimeImg : styles.stageTimeImgDisable} />
-                            <Text style={isActive[idx] ? styles.timeText : styles.timeTextDisable}>{timeConversion(item[5])}</Text>
+                            <Image source={require('./assets/image/stageTime.png')} style={styles.stageTimeImg} />
+                            <Text style={styles.timeText}>{timeConversion(item[6])}</Text>
                         </View>
+                        {/* <TouchableOpacity 
+                            onPress={() => {testBtn()}}
+                            style={{position:'absolute', marginLeft: 30,marginTop: -10, backgroundColor:'red'}}>
+                            <Text style={{color:"white"}}>수정</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            onPress={() => {console.log("하하")}}
+                            style={{position:'absolute', marginLeft: 80, marginTop: -10, backgroundColor:'red'}}>
+                            <Text style={{color:"white"}}>삭제</Text>
+                        </TouchableOpacity> */}
                     </View>
                 </View>
+                </View> 
             </View>
-        </TouchableOpacity>))
+        </TouchableOpacity>
+        )): <View><Text>11</Text></View>
+        
 
     return (
         <View style={styles.mainBox}>
@@ -86,10 +143,16 @@ const DetailRecipeSetting = (props) => {
                 </ScrollView>
             </View>
             <View style={styles.stageAddOutBox}>
-                <StageAddModal visible={addModalVisible}
+                <StageAddModal visible={addStageModalVisible}
                         onSubmit={handleAddSubmit}
-                        onClose={() => setAddModalVisible(false)}/>
-                <TouchableOpacity style={styles.addBox} onPress={handleAddSubmit}>
+                        onClose={() => setStageAddModalVisible(false)}
+                        props={props.num}
+                        />
+                <DeleteButton 
+                        isvisible={delModalVisible} 
+                        handleDeleteConfirm={handleDeleteConfirm} 
+                        handleDeleteCancel={handleDeleteCancel} />
+                <TouchableOpacity style={styles.addBox} onPress={() => {setStageAddModalVisible(true)}}>
                     <Image style={styles.stageAddBoxImg} source={require('./assets/image/stageAddBtn.png')} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.stageSettingBtn} onPress={() => {console.log('OPERaitng')}}>
@@ -99,12 +162,18 @@ const DetailRecipeSetting = (props) => {
         </View>
     )
 } 
-
-
 export default DetailRecipeSetting;
 
 const styles = StyleSheet.create({
+    scrollView:{
+        height:'22%'
+    },
+    stageMain: {
+        height: '8.7%',
+        marginBottom: 12,
+    },  
     contentContainer: {
+        marginBottom: 0,
         paddingHorizontal: 0,
         paddingVertical: 0,
         minHeight: 800,
@@ -121,17 +190,17 @@ const styles = StyleSheet.create({
         fontSize: 16
     },
     stageSettingBtn: {
-        width: '92%',
+        width: '91%',
         height: '65%',
         borderRadius: 5, 
         marginTop: 5,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#753CEF',
-        marginLeft: 15,
+        marginLeft: 21,
     },
     stageAddBoxImg: {
-        width: '92%',
+        width: '90%',
         height: '100%',
         resizeMode: 'center',
     }, 
@@ -139,6 +208,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         alignItems: 'center',
+        marginLeft: 2
     },
     stageAddOutBox: {
         width: '80%',
@@ -253,12 +323,12 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     stageBtn: {
-        width: '86%',
-        height: '8.7%',
+        width: '85%',
+        height: '100%',
         borderRadius: 5, 
         flexDirection: 'row',
         marginBottom: 10,
-        marginLeft: 19,
+        marginLeft: 23,
         backgroundColor: 'white',
         marginTop: 5,
     },
