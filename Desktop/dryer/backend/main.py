@@ -4,16 +4,23 @@ from fastapi.websockets import WebSocket
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import requests
-import json
-import re
-import threading
 import config
+import queue
+import asyncio
 
 from socketSet import socketModule
-from database import databaseMaria
+from database import databaseMaria, graphiteDB
 from operation import operation
 
+import dto
+
+
 app = FastAPI()
+value = dto.InputValue(temperature=0, humidity=0)
+value_oper = dto.Operating(thermic_rays=0, blowing=0, dehumidify=0)
+graphite = graphiteDB.Transmission(temperature=0, humidity=0)
+graphite_oper = graphiteDB.TransmissionOperating(thermic_rays=0, blowing=0, dehumidify=0)
+q = asyncio.Queue()
 
 
 origins = [
@@ -32,42 +39,50 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-soket = socketModule.SocketControl()
-action = operation.Monitor()
 
 class stageAddData(BaseModel):
     temperature: str
     humidity: str
     time: str
 
-# @app.get("/testSenser")
-# async def testSenser():
-#     data = soket.start_server(['senser1','senser2', 'senser3'])
-#     print(data,"server")
-#     return data
+@app.get("/testSenser")
+def testSenser():
+    data = socketModule.SocketControl.get_instance().start_server(['senser1'])
+    print(data,"측정중")
+    value.set_temperature(data[0][0])
+    value.set_humidity(data[0][1])
+    temp = value.get_temperature()
+    hum = value.get_humidity()
+    graphite.sendData(temp, hum)
+    return data
 
-# @app.get("/testFan1")
-# async def test():
-#     soket.start_server(["fan1_off","fan2_off"])
-#     # soket.start_server(["h1_off"])
-#     return None
-
-# @app.get("/testFan")
-# async def test():
-#     soket.start_server(["fan1_on","fan2_on"])
-#     # soket.start_server(["h1_on"])
-#     return None
-
-@app.get("/test1")
-async def test():
-    soket.start_server(["h1_off","h2_off","h3_off",'fan1_off','fan2_off'])
-    # soket.start_server(["h1_off"])
+@app.get("/testFan1")
+def test():
+    socketModule.SocketControl.get_instance().start_server(["fan2_off"])
     return None
 
-@app.get("/test")
-async def test():
-    action.(39,29,60)
+@app.get("/testFan")
+def test():
+    socketModule.SocketControl.get_instance().start_server(["fan2_on"])
     return None
+
+@app.post("/test1")
+def test():
+    operation.stop_monitoring()
+    return None
+
+@app.post("/test")
+async def test(data: dict):
+    print(data)
+    arr = data['data']
+    result = []
+    for i in arr:
+        result.append(i[4:7])
+        await q.put(i[4:7])
+    operation.start_monitoring(result)
+    # operation.dequeue()
+    return True
+
 
 @app.get("/dryList")
 def dryList():
@@ -161,7 +176,7 @@ def get_last_value(data):
         return None
 
 @app.get("/dryer_situation_ws")
-async def dryer_situation():
+def dryer_situation():
     mergeData = []
     fields = ['operation','thermic_rays','blowing','learning','temperature','humidity']
     for field in fields:

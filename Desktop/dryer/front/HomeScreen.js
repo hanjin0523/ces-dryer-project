@@ -25,8 +25,6 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import BackgroundTimer from 'react-native-background-timer';
 import { LogBox } from 'react-native'; LogBox.ignoreLogs(['new NativeEventEmitter']);
 
-
-
 import TempImg from './TempImg';
 import RecipeSetting from './RecipeSetting';
 import HumImg from './HumImg';
@@ -134,9 +132,15 @@ console.log(operSettingTime,"오퍼레이팅셋팅타임")
         }
     }
 ////테스트구간!!!!/////
-    const testBtn = async() => {
+    const operBtn = async() => {
+        console.log(operSettingTime)
         try{
-            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/${operatingActive ? 'test1' : 'test'}`)
+            const response = await fetch(`http://${SERVER_IP}:${SERVER_PORT}/${operatingActive ? 'test1' : 'test'}`,{
+                method: 'POST',
+                headers : {"Content-Type":"application/json; charset=utf-8"},
+                body: JSON.stringify({data : operSettingTime})
+            });
+
         if (!response.ok) {
             throw new Error('서버 오류 발생');
         }
@@ -146,7 +150,7 @@ console.log(operSettingTime,"오퍼레이팅셋팅타임")
         }
     }
     useEffect(() => {
-        testBtn()
+        operBtn()
     },[operatingActive])
 
     const testBtn1 = async() => {
@@ -357,8 +361,7 @@ const FirstBox = () => {
         const fetch_dryer_situation = async () => {
         try {
             const dryer_situation = await axios.get(
-            `http://${SERVER_IP}:${SERVER_PORT}/dryer_situation_ws`
-            // `http://${SERVER_IP}:${SERVER_PORT}/testSenser`
+            `http://${SERVER_IP}:${SERVER_PORT}/testSenser`
             );
             console.log(dryer_situation.data)
             setValue(dryer_situation.data);
@@ -400,10 +403,10 @@ const FirstBox = () => {
                 <SubText main="Humidity" sub="습도" />
             </View>
             <View style={{ flexDirection: "row", width: width / 4.7 }}>
-                {/* <TempImg tem_num={value ? value[0][0] : null}/>
-                <HumImg hum_num={value ? value[1][1] : null}/> */}
-                <TempImg tem_num={value ? value[4]['value'] : null}/>
-                <HumImg hum_num={value ? value[5]['value'] : null}/>
+                <TempImg tem_num={value ? value[0][0] : null}/>
+                <HumImg hum_num={value ? value[0][1] : null}/>
+                {/* <TempImg tem_num={value ? value[4]['value'] : null}/>
+                <HumImg hum_num={value ? value[5]['value'] : null}/> */}
             </View>
         </View>
         );

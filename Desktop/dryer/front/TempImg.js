@@ -12,7 +12,7 @@ const TempImg = ({tem_num}) => {
                 require("./assets/image/temp/temp20.png")} 
                 style={style.temHumImg}
                 resizeMode="contain">
-                <Text style={{fontSize:15, fontWeight:"bold", color:"black"}}>{"loading.."}
+                <Text style={{fontSize:15, fontWeight:"bold", color:"black"}}>{"측정중.."}
                     <Text style={{fontSize:10}}></Text>
                 </Text>    
                 </ImageBackground>
